@@ -1,0 +1,8 @@
+# Configuration definitions for thorn HDF5
+# $Header$
+
+PROVIDES HDF5
+{
+  SCRIPT HDF5.sh
+  LANG bash
+}
