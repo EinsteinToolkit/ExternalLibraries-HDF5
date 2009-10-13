@@ -16,6 +16,7 @@ HDF5_DIR=${INSTALL_DIR}/${NAME}
 
 # Clean up environment
 unset LIBS
+unset MAKEFLAGS
 
 
 
