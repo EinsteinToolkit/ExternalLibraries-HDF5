@@ -9,7 +9,7 @@ set -x                          # Output commands
 set -e                          # Abort on errors
 
 # Set locations
-NAME=hdf5-1.8.3
+NAME=hdf5-1.8.4
 SRCDIR=$(dirname $0)
 INSTALL_DIR=${SCRATCH_BUILD}
 HDF5_DIR=${INSTALL_DIR}/${NAME}
@@ -56,7 +56,7 @@ unset MAKEFLAGS
         make install
         popd
         
-        : > done-${NAME}
+        echo 'done' > done-${NAME}
         echo "HDF5: Done."
     fi
 )
