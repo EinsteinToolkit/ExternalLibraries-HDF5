@@ -1,5 +1,4 @@
 # Configuration definitions for thorn HDF5
-# $Header$
 
 PROVIDES HDF5
 {
