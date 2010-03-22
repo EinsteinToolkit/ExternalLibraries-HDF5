@@ -8,15 +8,38 @@
 set -x                          # Output commands
 set -e                          # Abort on errors
 
-# Set locations
-NAME=hdf5-1.8.4
-SRCDIR=$(dirname $0)
-INSTALL_DIR=${SCRATCH_BUILD}
-HDF5_DIR=${INSTALL_DIR}/${NAME}
 
-# Clean up environment
-unset LIBS
-unset MAKEFLAGS
+
+################################################################################
+# Search
+################################################################################
+
+if [ -z "${HDF5_DIR}" ]; then
+    echo "BEGIN MESSAGE"
+    echo "HDF5 selected, but HDF5_DIR not set.  Checking some places..."
+    echo "END MESSAGE"
+    
+    FILES="include/hdf5.h"
+    DIRS="/usr /usr/local /usr/local/hdf5 /usr/local/packages/hdf5 /usr/local/apps/hdf5 ${HOME} c:/packages/hdf5"
+    for file in $FILES; do
+        for dir in $DIRS; do
+            if test -r "$dir/$file"; then
+                HDF5_DIR="$dir"
+                break
+            fi
+        done
+    done
+    
+    if [ -z "$HDF5_DIR" ]; then
+        echo "BEGIN MESSAGE"
+        echo "HDF5 not found"
+        echo "END MESSAGE"
+    else
+        echo "BEGIN MESSAGE"
+        echo "Found HDF5 in ${HDF5_DIR}"
+        echo "END MESSAGE"
+    fi
+fi
 
 
 
@@ -24,6 +47,21 @@ unset MAKEFLAGS
 # Build
 ################################################################################
 
+if [ -z "${HDF5_DIR}" ]; then
+    echo "BEGIN MESSAGE"
+    echo "Building HDF5..."
+    echo "END MESSAGE"
+    
+    # Set locations
+    NAME=hdf5-1.8.4
+    SRCDIR=$(dirname $0)
+    INSTALL_DIR=${SCRATCH_BUILD}
+    HDF5_DIR=${INSTALL_DIR}/${NAME}
+    
+    # Clean up environment
+    unset LIBS
+    unset MAKEFLAGS
+    
 (
     exec >&2                    # Redirect stdout to stderr
     set -x                      # Output commands
@@ -62,12 +100,14 @@ unset MAKEFLAGS
         echo "HDF5: Done."
     fi
 )
-
-if (( $? )); then
-    echo 'BEGIN ERROR'
-    echo 'Error while building HDF5.  Aborting.'
-    echo 'END ERROR'
-    exit 1
+    
+    if (( $? )); then
+        echo 'BEGIN ERROR'
+        echo 'Error while building HDF5.  Aborting.'
+        echo 'END ERROR'
+        exit 1
+    fi
+    
 fi
 
 
