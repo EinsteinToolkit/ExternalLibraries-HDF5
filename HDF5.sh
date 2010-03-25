@@ -167,6 +167,11 @@ if [ $test_zlib -eq 0 ]; then
     fi
 fi
 
+# Add the math library which might not be linked by default
+if [ $is_windows -eq 0 ]; then
+    HDF5_LIBS="$HDF5_LIBS m"
+fi
+
 
 
 ################################################################################
