@@ -146,6 +146,7 @@ else
     test_szlib=1
 fi
 if [ $test_szlib -eq 0 ]; then
+    HDF5_LIB_DIRS="$HDF5_LIB_DIRS $LIBSZ_DIR"
     if [ $is_windows -eq 0 ]; then
         HDF5_LIBS="$HDF5_LIBS sz"
     else
@@ -160,6 +161,7 @@ else
     test_zlib=1
 fi
 if [ $test_zlib -eq 0 ]; then
+    HDF5_LIB_DIRS="$HDF5_LIB_DIRS $LIBZ_DIR"
     if [ $is_windows -eq 0 ]; then
         HDF5_LIBS="$HDF5_LIBS z"
     else
