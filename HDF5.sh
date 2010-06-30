@@ -53,14 +53,17 @@ if [ -z "${HDF5_DIR}" ]; then
     echo "END MESSAGE"
     
     # Set locations
-    NAME=hdf5-1.8.4
+    NAME=hdf5-1.8.5
     SRCDIR=$(dirname $0)
     INSTALL_DIR=${SCRATCH_BUILD}
     HDF5_DIR=${INSTALL_DIR}/${NAME}
     
-    # Clean up environment
+    # Set up environment
     unset LIBS
     unset MAKEFLAGS
+    if echo '' ${ARFLAGS} | grep 64 > /dev/null 2>&1; then
+        export OBJECT_MODE=64
+    fi
     
 (
     exec >&2                    # Redirect stdout to stderr
@@ -73,6 +76,9 @@ if [ -z "${HDF5_DIR}" ]; then
         echo "HDF5: The enclosed HDF5 library has already been built; doing nothing"
     else
         echo "HDF5: Building enclosed HDF5 library"
+        
+        # Should we use gmake or make?
+        MAKE=$(gmake --help > /dev/null 2>&1 && echo gmake || echo make)
         
         echo "HDF5: Unpacking archive..."
         rm -rf build-${NAME}
@@ -90,10 +96,10 @@ if [ -z "${HDF5_DIR}" ]; then
         ./configure --prefix=${HDF5_DIR}
         
         echo "HDF5: Building..."
-        make
+        ${MAKE}
         
         echo "HDF5: Installing..."
-        make install
+        ${MAKE} install
         popd
         
         echo 'done' > done-${NAME}
