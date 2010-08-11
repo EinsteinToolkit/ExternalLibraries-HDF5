@@ -47,7 +47,7 @@ fi
 # Build
 ################################################################################
 
-if [ -z "${HDF5_DIR}" ]; then
+if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
     echo "BEGIN MESSAGE"
     echo "Building HDF5..."
     echo "END MESSAGE"
@@ -123,8 +123,13 @@ fi
 ################################################################################
 
 # Set options
-HDF5_INC_DIRS="${HDF5_DIR}/include"
-HDF5_LIB_DIRS="${HDF5_DIR}/lib"
+if [ "${HDF5_DIR}" = '/usr' -o "${HDF5_DIR}" = '/usr/local' ]; then
+    HDF5_INC_DIRS=''
+    HDF5_LIB_DIRS=''
+else
+    HDF5_INC_DIRS="${HDF5_DIR}/include"
+    HDF5_LIB_DIRS="${HDF5_DIR}/lib"
+fi
 HDF5_LIBS='hdf5'
 
 
