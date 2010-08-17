@@ -60,7 +60,6 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
     
     # Set up environment
     unset LIBS
-    unset MAKEFLAGS
     if echo '' ${ARFLAGS} | grep 64 > /dev/null 2>&1; then
         export OBJECT_MODE=64
     fi
