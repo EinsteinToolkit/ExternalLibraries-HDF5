@@ -16,18 +16,22 @@ set -e                          # Abort on errors
 
 if [ -z "${HDF5_DIR}" ]; then
     echo "BEGIN MESSAGE"
-    echo "HDF5 selected, but HDF5_DIR not set.  Checking some places..."
+    echo "HDF5 selected, but HDF5_DIR not set. Checking some places..."
     echo "END MESSAGE"
     
-    FILES="include/hdf5.h"
-    DIRS="/usr /usr/local /usr/local/hdf5 /usr/local/packages/hdf5 /usr/local/apps/hdf5 ${HOME} c:/packages/hdf5"
-    for file in $FILES; do
-        for dir in $DIRS; do
-            if test -r "$dir/$file"; then
-                HDF5_DIR="$dir"
+    FILES="include/hdf5.h lib/libhdf5.a lib/libhdf5_cpp.a $(if [ "${F90}" != "none" ]; then echo 'lib/libhdf5_fortran.a'; fi) lib/libhdf5_hl.a lib/libhdf5_hl_cpp.a"
+    DIRS="/usr /usr/local /usr/local/hdf5 /usr/local/packages/hdf5 /usr/local/apps/hdf5 /opt/local ${HOME} ${HOME}/hdf5 c:/packages/hdf5"
+    for dir in $DIRS; do
+        HDF5_DIR="$dir"
+        for file in $FILES; do
+            if [ ! -r "$dir/$file" ]; then
+                unset HDF5_DIR
                 break
             fi
         done
+        if [ -n "$HDF5_DIR" ]; then
+            break
+        fi
     done
     
     if [ -z "$HDF5_DIR" ]; then
@@ -55,22 +59,34 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
     # Set locations
     NAME=hdf5-1.8.5
     SRCDIR=$(dirname $0)
-    INSTALL_DIR=${SCRATCH_BUILD}
-    HDF5_DIR=${INSTALL_DIR}/${NAME}
+    BUILD_DIR=${SCRATCH_BUILD}/build/${NAME}
+    INSTALL_DIR=${SCRATCH_BUILD}/external/${NAME}
+    DONE_FILE=${SCRATCH_BUILD}/done/${NAME}
+    HDF5_DIR=${INSTALL_DIR}
     
     # Set up environment
     unset LIBS
     if echo '' ${ARFLAGS} | grep 64 > /dev/null 2>&1; then
         export OBJECT_MODE=64
     fi
+    if [ "${F90}" = "none" ]; then
+        echo 'BEGIN MESSAGE'
+        echo 'No Fortran 90 compiler available. Building HDF5 library without Fortran support.'
+        echo 'END MESSAGE'
+        unset FC
+        unset FCFLAGS
+    else
+        export FC="${F90}"
+        export FCFLAGS="${F90FLAGS}"
+    fi
     
 (
     exec >&2                    # Redirect stdout to stderr
     set -x                      # Output commands
     set -e                      # Abort on errors
-    cd ${INSTALL_DIR}
-    if [ -e done-${NAME} -a done-${NAME} -nt ${SRCDIR}/dist/${NAME}.tar.gz \
-                         -a done-${NAME} -nt ${SRCDIR}/HDF5.sh ]
+    cd ${SCRATCH_BUILD}
+    if [ -e ${DONE_FILE} -a ${DONE_FILE} -nt ${SRCDIR}/dist/${NAME}.tar.gz \
+                         -a ${DONE_FILE} -nt ${SRCDIR}/HDF5.sh ]
     then
         echo "HDF5: The enclosed HDF5 library has already been built; doing nothing"
     else
@@ -78,21 +94,21 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
         
         # Should we use gmake or make?
         MAKE=$(gmake --help > /dev/null 2>&1 && echo gmake || echo make)
-        
-        echo "HDF5: Unpacking archive..."
-        rm -rf build-${NAME}
-        mkdir build-${NAME}
-        pushd build-${NAME}
         # Should we use gtar or tar?
         TAR=$(gtar --help > /dev/null 2> /dev/null && echo gtar || echo tar)
+        
+        echo "HDF5: Preparing directory structure..."
+        mkdir build external done 2> /dev/null || true
+        rm -rf ${BUILD_DIR} ${INSTALL_DIR}
+        mkdir ${BUILD_DIR} ${INSTALL_DIR}
+        
+        echo "HDF5: Unpacking archive..."
+        pushd ${BUILD_DIR}
         ${TAR} xzf ${SRCDIR}/dist/${NAME}.tar.gz
-        popd
         
         echo "HDF5: Configuring..."
-        rm -rf ${NAME}
-        mkdir ${NAME}
-        pushd build-${NAME}/${NAME}
-        ./configure --prefix=${HDF5_DIR}
+        cd ${NAME}
+        ./configure --prefix=${HDF5_DIR} --enable-cxx $(if [ -n "${FC}" ]; then echo '' '--enable-fortran'; fi)
         
         echo "HDF5: Building..."
         ${MAKE}
@@ -101,14 +117,14 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
         ${MAKE} install
         popd
         
-        echo 'done' > done-${NAME}
+        date > ${DONE_FILE}
         echo "HDF5: Done."
     fi
 )
     
     if (( $? )); then
         echo 'BEGIN ERROR'
-        echo 'Error while building HDF5.  Aborting.'
+        echo 'Error while building HDF5. Aborting.'
         echo 'END ERROR'
         exit 1
     fi
@@ -126,10 +142,11 @@ if [ "${HDF5_DIR}" = '/usr' -o "${HDF5_DIR}" = '/usr/local' ]; then
     HDF5_INC_DIRS=''
     HDF5_LIB_DIRS=''
 else
-    HDF5_INC_DIRS="${HDF5_DIR}/include"
+    # Fortran modules may be located in the lib directory
+    HDF5_INC_DIRS="${HDF5_DIR}/include ${HDF5_DIR}/lib"
     HDF5_LIB_DIRS="${HDF5_DIR}/lib"
 fi
-HDF5_LIBS='hdf5'
+HDF5_LIBS='hdf5_hl_cpp hdf5_hl hdf5_cpp hdf5_fortran hdf5'
 
 
 
