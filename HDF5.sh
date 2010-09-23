@@ -57,7 +57,7 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
     echo "END MESSAGE"
     
     # Set locations
-    NAME=hdf5-1.8.5
+    NAME=hdf5-1.8.5-patch1
     SRCDIR=$(dirname $0)
     BUILD_DIR=${SCRATCH_BUILD}/build/${NAME}
     INSTALL_DIR=${SCRATCH_BUILD}/external/${NAME}
@@ -65,10 +65,6 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
     HDF5_DIR=${INSTALL_DIR}
     
     # Set up environment
-    unset LIBS
-    if echo '' ${ARFLAGS} | grep 64 > /dev/null 2>&1; then
-        export OBJECT_MODE=64
-    fi
     if [ "${F90}" = "none" ]; then
         echo 'BEGIN MESSAGE'
         echo 'No Fortran 90 compiler available. Building HDF5 library without Fortran support.'
@@ -78,6 +74,10 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
     else
         export FC="${F90}"
         export FCFLAGS="${F90FLAGS}"
+    fi
+    unset LIBS
+    if echo '' ${ARFLAGS} | grep 64 > /dev/null 2>&1; then
+        export OBJECT_MODE=64
     fi
     
 (
@@ -105,6 +105,7 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
         echo "HDF5: Unpacking archive..."
         pushd ${BUILD_DIR}
         ${TAR} xzf ${SRCDIR}/dist/${NAME}.tar.gz
+        patch -p0 < ${SRCDIR}/dist/dt_arith.diff
         
         echo "HDF5: Configuring..."
         cd ${NAME}
