@@ -57,28 +57,13 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
     echo "END MESSAGE"
     
     # Set locations
+    THORN=HDF5
     NAME=hdf5-1.8.5-patch1
     SRCDIR=$(dirname $0)
-    BUILD_DIR=${SCRATCH_BUILD}/build/${NAME}
-    INSTALL_DIR=${SCRATCH_BUILD}/external/${NAME}
-    DONE_FILE=${SCRATCH_BUILD}/done/${NAME}
+    BUILD_DIR=${SCRATCH_BUILD}/build/${THORN}
+    INSTALL_DIR=${SCRATCH_BUILD}/external/${THORN}
+    DONE_FILE=${SCRATCH_BUILD}/done/${THORN}
     HDF5_DIR=${INSTALL_DIR}
-    
-    # Set up environment
-    if [ "${F90}" = "none" ]; then
-        echo 'BEGIN MESSAGE'
-        echo 'No Fortran 90 compiler available. Building HDF5 library without Fortran support.'
-        echo 'END MESSAGE'
-        unset FC
-        unset FCFLAGS
-    else
-        export FC="${F90}"
-        export FCFLAGS="${F90FLAGS}"
-    fi
-    unset LIBS
-    if echo '' ${ARFLAGS} | grep 64 > /dev/null 2>&1; then
-        export OBJECT_MODE=64
-    fi
     
 (
     exec >&2                    # Redirect stdout to stderr
@@ -96,6 +81,22 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
         MAKE=$(gmake --help > /dev/null 2>&1 && echo gmake || echo make)
         # Should we use gtar or tar?
         TAR=$(gtar --help > /dev/null 2> /dev/null && echo gtar || echo tar)
+        
+        # Set up environment
+        if [ "${F90}" = "none" ]; then
+            echo 'BEGIN MESSAGE'
+            echo 'No Fortran 90 compiler available. Building HDF5 library without Fortran support.'
+            echo 'END MESSAGE'
+            unset FC
+            unset FCFLAGS
+        else
+            export FC="${F90}"
+            export FCFLAGS="${F90FLAGS}"
+        fi
+        unset LIBS
+        if echo '' ${ARFLAGS} | grep 64 > /dev/null 2>&1; then
+            export OBJECT_MODE=64
+        fi
         
         echo "HDF5: Preparing directory structure..."
         mkdir build external done 2> /dev/null || true
@@ -116,6 +117,9 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
         
         echo "HDF5: Installing..."
         ${MAKE} install
+        
+#        echo "HDF5: Cleaning up..."
+#        ${MAKE} clean
         popd
         
         date > ${DONE_FILE}
