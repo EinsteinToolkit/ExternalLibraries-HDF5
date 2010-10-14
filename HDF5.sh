@@ -126,7 +126,7 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
         echo "HDF5: Done."
     fi
 )
-    
+
     if (( $? )); then
         echo 'BEGIN ERROR'
         echo 'Error while building HDF5. Aborting.'
