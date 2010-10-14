@@ -81,6 +81,10 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
         MAKE=$(gmake --help > /dev/null 2>&1 && echo gmake || echo make)
         # Should we use gtar or tar?
         TAR=$(gtar --help > /dev/null 2> /dev/null && echo gtar || echo tar)
+        # Should we use gpatch or patch?
+        if [ -z "$PATCH" ]; then
+            PATCH=$(gpatch -v > /dev/null 2>&1 && echo gpatch || echo patch)
+        fi
         
         # Set up environment
         if [ "${F90}" = "none" ]; then
@@ -106,7 +110,7 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
         echo "HDF5: Unpacking archive..."
         pushd ${BUILD_DIR}
         ${TAR} xzf ${SRCDIR}/dist/${NAME}.tar.gz
-        patch -p0 < ${SRCDIR}/dist/dt_arith.diff
+        ${PATCH} -p0 < ${SRCDIR}/dist/dt_arith.diff
         
         echo "HDF5: Configuring..."
         cd ${NAME}
