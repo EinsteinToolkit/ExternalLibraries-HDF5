@@ -117,10 +117,10 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
         
         echo "HDF5: Installing..."
         ${MAKE} install
-        
-#        echo "HDF5: Cleaning up..."
-#        ${MAKE} clean
         popd
+        
+        echo "HDF5: Cleaning up..."
+        rm -rf ${BUILD_DIR}
         
         date > ${DONE_FILE}
         echo "HDF5: Done."
