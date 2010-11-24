@@ -97,6 +97,7 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
             export FC="${F90}"
             export FCFLAGS="${F90FLAGS}"
         fi
+        export LDFLAGS
         unset LIBS
         if echo '' ${ARFLAGS} | grep 64 > /dev/null 2>&1; then
             export OBJECT_MODE=64
