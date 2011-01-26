@@ -99,6 +99,7 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
         fi
         export LDFLAGS
         unset LIBS
+        unset RPATH
         if echo '' ${ARFLAGS} | grep 64 > /dev/null 2>&1; then
             export OBJECT_MODE=64
         fi
@@ -115,7 +116,7 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
         
         echo "HDF5: Configuring..."
         cd ${NAME}
-        ./configure --prefix=${HDF5_DIR} --enable-cxx $(if [ -n "${FC}" ]; then echo '' '--enable-fortran'; fi)
+        ./configure --prefix=${HDF5_DIR} --with-zlib=${ZLIB_DIR} --enable-cxx $(if [ -n "${FC}" ]; then echo '' '--enable-fortran'; fi)
         
         echo "HDF5: Building..."
         ${MAKE}
