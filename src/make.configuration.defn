@@ -1,0 +1,4 @@
+# make.configuration.defn file for thorn HDF5 
+
+# Define this thorn's utilities
+ALL_UTILS += hdf5_merge hdf5_extract hdf5_double_to_single
