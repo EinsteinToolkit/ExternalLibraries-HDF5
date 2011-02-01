@@ -1,4 +1,7 @@
 # make.configuration.defn file for thorn HDF5 
 
+# Define standard HDF5 utilities
+ALL_UTILS += gif2h5 h52gif h5c++ h5cc h5copy h5debug h5diff h5dump h5fc h5import h5jam h5ls h5mkgrp h5perf_serial h5redeploy h5repack h5repart h5stat h5unjam
+
 # Define this thorn's utilities
 ALL_UTILS += hdf5_merge hdf5_extract hdf5_double_to_single
