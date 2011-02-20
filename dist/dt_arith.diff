@@ -1,7 +1,6 @@
-diff -ru hdf5-1.8.5-patch1.orig/test/dt_arith.c hdf5-1.8.5-patch1/test/dt_arith.c
---- hdf5-1.8.5-patch1.orig/test/dt_arith.c	2010-08-26 09:21:40.000000000 -0500
-+++ hdf5-1.8.5-patch1/test/dt_arith.c	2010-09-18 16:08:11.000000000 -0500
-@@ -5177,8 +5177,8 @@
+--- hdf5-1.8.6.orig/test/dt_arith.c	2011-02-14 11:23:15.000000000 -0500
++++ hdf5-1.8.6/test/dt_arith.c	2011-02-18 10:33:03.000000000 -0500
+@@ -5193,8 +5193,8 @@
  static int
  run_fp_int_conv(const char *name)
  {

@@ -58,7 +58,7 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
     
     # Set locations
     THORN=HDF5
-    NAME=hdf5-1.8.5-patch1
+    NAME=hdf5-1.8.6
     SRCDIR=$(dirname $0)
     BUILD_DIR=${SCRATCH_BUILD}/build/${THORN}
     INSTALL_DIR=${SCRATCH_BUILD}/external/${THORN}
