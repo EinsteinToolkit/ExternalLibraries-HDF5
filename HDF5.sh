@@ -24,6 +24,21 @@ fi
 
 
 ################################################################################
+# Decide which libraries to link with
+################################################################################
+
+# Set up names of the Fortran and C++ libraries based on user settable variables
+# Assign default values to variables
+if [ "${HDF5_ENABLE_CXX:=yes}" = 'yes' ]; then
+    HDF5_CXX_LIBS="hdf5_cpp hdf5_hl_cpp"
+fi
+if [ "${HDF5_ENABLE_FORTRAN:=yes}" = 'yes' ]; then
+    HDF5_FORTRAN_LIBS=$(if [ "${F90}" != "none" ]; then echo 'hdf5_fortran'; fi)
+fi
+
+
+
+################################################################################
 # Search
 ################################################################################
 
@@ -129,7 +144,7 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
         
         echo "HDF5: Configuring..."
         cd ${NAME}
-        ./configure --prefix=${HDF5_DIR} --with-zlib=${ZLIB_DIR} --enable-cxx $(if [ -n "${FC}" ]; then echo '' '--enable-fortran'; fi)
+        ./configure --prefix=${HDF5_DIR} --with-zlib=${ZLIB_DIR} --enable-cxx=${HDF5_ENABLE_CXX} $(if [ -n "${FC}" ]; then echo '' "--enable-fortran=${HDF5_ENABLE_FORTRAN}"; fi)
         
         echo "HDF5: Building..."
         ${MAKE}
@@ -170,7 +185,7 @@ else
     HDF5_INC_DIRS="${HDF5_DIR}/include ${HDF5_DIR}/lib"
     HDF5_LIB_DIRS="${HDF5_DIR}/lib"
 fi
-HDF5_LIBS='hdf5_hl_cpp hdf5_hl hdf5_cpp hdf5_fortran hdf5'
+HDF5_LIBS="hdf5_hl ${HDF5_CXX_LIBS} ${HDF5_FORTRAN_LIBS} hdf5"
 
 
 
@@ -233,11 +248,13 @@ fi
 
 # Pass options to Cactus
 echo "BEGIN MAKE_DEFINITION"
-echo "HAVE_HDF5     = 1"
-echo "HDF5_DIR      = ${HDF5_DIR}"
-echo "HDF5_INC_DIRS = ${HDF5_INC_DIRS}"
-echo "HDF5_LIB_DIRS = ${HDF5_LIB_DIRS}"
-echo "HDF5_LIBS     = ${HDF5_LIBS}"
+echo "HAVE_HDF5           = 1"
+echo "HDF5_DIR            = ${HDF5_DIR}"
+echo "HDF5_ENABLE_CXX     = ${HDF5_ENABLE_CXX}"
+echo "HDF5_ENABLE_FORTRAN = ${HDF5_ENABLE_FORTRAN}"
+echo "HDF5_INC_DIRS       = ${HDF5_INC_DIRS}"
+echo "HDF5_LIB_DIRS       = ${HDF5_LIB_DIRS}"
+echo "HDF5_LIBS           = ${HDF5_LIBS}"
 echo "END MAKE_DEFINITION"
 
 echo 'INCLUDE_DIRECTORY $(HDF5_INC_DIRS)'
