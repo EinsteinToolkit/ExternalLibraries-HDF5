@@ -89,7 +89,17 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
     NAME=hdf5-1.8.6
     SRCDIR=$(dirname $0)
     BUILD_DIR=${SCRATCH_BUILD}/build/${THORN}
-    INSTALL_DIR=${SCRATCH_BUILD}/external/${THORN}
+    if [ -z "${HDF5_INSTALL_DIR}" ]; then
+        echo "BEGIN MESSAGE"
+        echo "HDF5 install directory, HDF5_INSTALL_DIR, not set. Installing in the default configuration location. "
+        echo "END MESSAGE"
+     INSTALL_DIR=${SCRATCH_BUILD}/external/${THORN}
+    else
+        echo "BEGIN MESSAGE"
+        echo "HDF5 install directory, HDF5_INSTALL_DIR, selected. Installing HDF5 at ${HDF5_INSTALL_DIR} "
+        echo "END MESSAGE"
+     INSTALL_DIR=${HDF5_INSTALL_DIR}
+    fi
     DONE_FILE=${SCRATCH_BUILD}/done/${THORN}
     HDF5_DIR=${INSTALL_DIR}
     
