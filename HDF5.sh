@@ -193,7 +193,8 @@ fi
 
 # Set options
 if [ "${HDF5_DIR}" = '/usr' -o "${HDF5_DIR}" = '/usr/local' ]; then
-    HDF5_INC_DIRS=''
+    # Fortran modules may be located in the lib directory
+    HDF5_INC_DIRS='${HDF5_DIR}/lib'
     HDF5_LIB_DIRS=''
 else
     # Fortran modules may be located in the lib directory
