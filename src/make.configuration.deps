@@ -1,4 +1,4 @@
-# make.configuration.deps file for thorn HDF5 
+# make.configuration.deps file for thorn HDF5
 
 # Standard HDF5 utilities are copied from the install directory
 
@@ -23,7 +23,7 @@ HDF5_LDFLAGS = $(DEBUG_LD) $(LDFLAGS) $(EXTRAFLAGS) $(GENERAL_LIBRARIES)
 $(HDF5_BUILD_DIR)/%.o: $(HDF5_SRC_DIR)/%.c
 	@echo "Compiling $<"
 	-$(MKDIR) $(MKDIRFLAGS) $(HDF5_BUILD_DIR) 2> /dev/null
-	$(CC) $< $(HDF5_CFLAGS) -c -o $@
+	$(CC) $< $(HDF5_CFLAGS) -DTHORN_IS_HDF5 -c -o $@
 
 # Link
 $(UTIL_DIR)/%: $(HDF5_BUILD_DIR)/%.o

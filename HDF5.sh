@@ -27,13 +27,16 @@ fi
 # Decide which libraries to link with
 ################################################################################
 
-# Set up names of the Fortran and C++ libraries based on user settable variables
-# Assign default values to variables
+# Set up names of the libraries based on configuration variables. Also
+# assign default values to variables.
+HDF5_C_LIBS='hdf5_hl hdf5'
 if [ "${HDF5_ENABLE_CXX:=yes}" = 'yes' ]; then
-    HDF5_CXX_LIBS="hdf5_cpp hdf5_hl_cpp"
+    HDF5_CXX_LIBS='hdf5_hl_cpp hdf5_cpp'
 fi
 if [ "${HDF5_ENABLE_FORTRAN:=yes}" = 'yes' ]; then
-    HDF5_FORTRAN_LIBS=$(if [ "${F90}" != "none" ]; then echo 'hdf5_fortran'; fi)
+    if [ "${F90}" != "none" ]; then
+        HDF5_FORTRAN_LIBS='hdf5hl_fortran hdf5_fortran'
+    fi
 fi
 
 
@@ -47,7 +50,7 @@ if [ -z "${HDF5_DIR}" ]; then
     echo "HDF5 selected, but HDF5_DIR not set. Checking some places..."
     echo "END MESSAGE"
     
-    FILES="include/hdf5.h lib/libhdf5.a lib/libhdf5_cpp.a $(if [ "${F90}" != "none" ]; then echo 'lib/libhdf5_fortran.a'; fi) lib/libhdf5_hl.a lib/libhdf5_hl_cpp.a"
+    FILES="include/hdf5.h $(for lib in ${HDF5_CXX_LIBS} ${HDF5_FORTRAN_LIBS} ${HDF5_C_LIBS}; do echo lib/lib${lib}.a; done)"
     DIRS="/usr /usr/local /usr/local/hdf5 /usr/local/packages/hdf5 /usr/local/apps/hdf5 /opt/local ${HOME} ${HOME}/hdf5 c:/packages/hdf5"
     for dir in $DIRS; do
         HDF5_DIR="$dir"
@@ -86,19 +89,19 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
     
     # Set locations
     THORN=HDF5
-    NAME=hdf5-1.8.6
+    NAME=hdf5-1.8.7
     SRCDIR=$(dirname $0)
     BUILD_DIR=${SCRATCH_BUILD}/build/${THORN}
     if [ -z "${HDF5_INSTALL_DIR}" ]; then
         echo "BEGIN MESSAGE"
-        echo "HDF5 install directory, HDF5_INSTALL_DIR, not set. Installing in the default configuration location. "
+        echo "HDF5 install directory HDF5_INSTALL_DIR is not set. Installing in the default configuration location."
         echo "END MESSAGE"
-     INSTALL_DIR=${SCRATCH_BUILD}/external/${THORN}
+        INSTALL_DIR=${SCRATCH_BUILD}/external/${THORN}
     else
         echo "BEGIN MESSAGE"
-        echo "HDF5 install directory, HDF5_INSTALL_DIR, selected. Installing HDF5 at ${HDF5_INSTALL_DIR} "
+        echo "HDF5 install directory HDF5_INSTALL_DIR is set. Installing HDF5 into ${HDF5_INSTALL_DIR}."
         echo "END MESSAGE"
-     INSTALL_DIR=${HDF5_INSTALL_DIR}
+        INSTALL_DIR=${HDF5_INSTALL_DIR}
     fi
     DONE_FILE=${SCRATCH_BUILD}/done/${THORN}
     HDF5_DIR=${INSTALL_DIR}
@@ -114,15 +117,6 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
         echo "HDF5: The enclosed HDF5 library has already been built; doing nothing"
     else
         echo "HDF5: Building enclosed HDF5 library"
-        
-        # Should we use gmake or make?
-        MAKE=$(gmake --help > /dev/null 2>&1 && echo gmake || echo make)
-        # Should we use gtar or tar?
-        TAR=$(gtar --help > /dev/null 2> /dev/null && echo gtar || echo tar)
-        # Should we use gpatch or patch?
-        if [ -z "$PATCH" ]; then
-            PATCH=$(gpatch -v > /dev/null 2>&1 && echo gpatch || echo patch)
-        fi
         
         # Set up environment
         if [ "${F90}" = "none" ]; then
@@ -147,10 +141,11 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
         rm -rf ${BUILD_DIR} ${INSTALL_DIR}
         mkdir ${BUILD_DIR} ${INSTALL_DIR}
         
+        # Build core library
         echo "HDF5: Unpacking archive..."
         pushd ${BUILD_DIR}
         ${TAR} xzf ${SRCDIR}/dist/${NAME}.tar.gz
-        ${PATCH} -p0 < ${SRCDIR}/dist/dt_arith.diff
+        #${PATCH} -p0 < ${SRCDIR}/dist/dt_arith.diff
         
         echo "HDF5: Configuring..."
         cd ${NAME}
@@ -168,6 +163,38 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
         ${MAKE} install
         popd
         
+        # Build checker
+        echo "HDF5: Unpacking checker archive..."
+        pushd ${BUILD_DIR}
+        ${TAR} xzf ${SRCDIR}/dist/h5check_2_0.tar.gz
+        
+        echo "HDF5: Configuring checker..."
+        cd h5check_2_0
+        # Point the checker to the just-installed library
+        export CPPFLAGS="${CPPFLAGS} -I${HDF5_DIR}/include"
+        export LDFLAGS="${LDFLAGS} -L${HDF5_DIR}/lib"
+        export H5CC="${CC}"
+        export H5CC_PP="${CPP}"
+        export H5FC="${FC}"
+        export H5FC_PP="${FPP}"
+        export H5CPP="${CXX}"
+        ./configure --prefix=${HDF5_DIR} --with-zlib=${ZLIB_DIR}
+        
+        echo "HDF5: Building checker..."
+        #${MAKE}
+        (cd src && ${MAKE})
+        (cd tool && ${MAKE})
+        
+        echo "HDF5: Installing checker..."
+        # The build fails in the "test" subdirectory, because
+        # /usr/include/hdf5.h (if it exists) is used instead of the
+        # the one we just installed. We therefore skip the build in
+        # the "test" subdirectory.
+        #${MAKE} install
+        (cd src && ${MAKE} install)
+        (cd tool && ${MAKE} install)
+        popd
+
         echo "HDF5: Cleaning up..."
         rm -rf ${BUILD_DIR}
         
@@ -201,7 +228,7 @@ else
     HDF5_INC_DIRS="${HDF5_DIR}/include ${HDF5_DIR}/lib"
     HDF5_LIB_DIRS="${HDF5_DIR}/lib"
 fi
-HDF5_LIBS="hdf5_hl ${HDF5_CXX_LIBS} ${HDF5_FORTRAN_LIBS} hdf5"
+HDF5_LIBS="${HDF5_CXX_LIBS} ${HDF5_FORTRAN_LIBS} ${HDF5_C_LIBS}"
 
 
 
