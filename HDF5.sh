@@ -45,7 +45,9 @@ fi
 # Search
 ################################################################################
 
-if [ -z "${HDF5_DIR}" ]; then
+if [ -z "${HDF5_DIR}"                                                   \
+     -o "$(echo "${HDF5_DIR}" | tr '[a-z]' '[A-Z]')" = 'BUILD' ]
+then
     echo "BEGIN MESSAGE"
     echo "HDF5 selected, but HDF5_DIR not set. Checking some places..."
     echo "END MESSAGE"
