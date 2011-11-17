@@ -91,7 +91,7 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
     
     # Set locations
     THORN=HDF5
-    NAME=hdf5-1.8.7
+    NAME=hdf5-1.8.8
     SRCDIR=$(dirname $0)
     BUILD_DIR=${SCRATCH_BUILD}/build/${THORN}
     if [ -z "${HDF5_INSTALL_DIR}" ]; then
@@ -147,7 +147,6 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
         echo "HDF5: Unpacking archive..."
         pushd ${BUILD_DIR}
         ${TAR} xzf ${SRCDIR}/dist/${NAME}.tar.gz
-        #${PATCH} -p0 < ${SRCDIR}/dist/dt_arith.diff
         
         echo "HDF5: Configuring..."
         cd ${NAME}
