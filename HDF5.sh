@@ -5,7 +5,9 @@
 ################################################################################
 
 # Set up shell
-set -x                          # Output commands
+if [ "$(echo ${VERBOSE} | tr '[:upper:]' '[:lower:]')" = 'yes' ]; then
+    set -x                      # Output commands
+fi
 set -e                          # Abort on errors
 
 
@@ -16,7 +18,7 @@ set -e                          # Abort on errors
 
 if [ -n "${HDF5}" ]; then
     echo 'BEGIN ERROR'
-    echo "Setting the option \"HDF5\" is incompatible with the HDF5 thorn. Please remove the option HDF5 = ${HDF5}."
+    echo "Setting the option \"HDF5\" is incompatible with the HDF5 thorn. Please remove the option HDF5=${HDF5}."
     echo 'END ERROR'
     exit 1
 fi
@@ -84,9 +86,11 @@ fi
 # Build
 ################################################################################
 
-if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
+if [ -z "${HDF5_DIR}"                                                  \
+     -o "$(echo "${HDF5_DIR}" | tr '[a-z]' '[A-Z]')" = 'BUILD' ]
+then
     echo "BEGIN MESSAGE"
-    echo "Building HDF5..."
+    echo "Using bundled HDF5..."
     echo "END MESSAGE"
     
     # Set locations
@@ -95,30 +99,35 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
     SRCDIR=$(dirname $0)
     BUILD_DIR=${SCRATCH_BUILD}/build/${THORN}
     if [ -z "${HDF5_INSTALL_DIR}" ]; then
-        echo "BEGIN MESSAGE"
-        echo "HDF5 install directory HDF5_INSTALL_DIR is not set. Installing in the default configuration location."
-        echo "END MESSAGE"
         INSTALL_DIR=${SCRATCH_BUILD}/external/${THORN}
     else
         echo "BEGIN MESSAGE"
-        echo "HDF5 install directory HDF5_INSTALL_DIR is set. Installing HDF5 into ${HDF5_INSTALL_DIR}."
+        echo "Installing HDF5 into ${HDF5_INSTALL_DIR}"
         echo "END MESSAGE"
         INSTALL_DIR=${HDF5_INSTALL_DIR}
     fi
     DONE_FILE=${SCRATCH_BUILD}/done/${THORN}
     HDF5_DIR=${INSTALL_DIR}
     
-(
-    exec >&2                    # Redirect stdout to stderr
-    set -x                      # Output commands
-    set -e                      # Abort on errors
-    cd ${SCRATCH_BUILD}
     if [ -e ${DONE_FILE} -a ${DONE_FILE} -nt ${SRCDIR}/dist/${NAME}.tar.gz \
                          -a ${DONE_FILE} -nt ${SRCDIR}/HDF5.sh ]
     then
-        echo "HDF5: The enclosed HDF5 library has already been built; doing nothing"
+        echo "BEGIN MESSAGE"
+        echo "HDF5 has already been built; doing nothing"
+        echo "END MESSAGE"
     else
-        echo "HDF5: Building enclosed HDF5 library"
+        echo "BEGIN MESSAGE"
+        echo "Building HDF5"
+        echo "END MESSAGE"
+        
+        # Build in a subshell
+        (
+        exec >&2                # Redirect stdout to stderr
+        if [ "$(echo ${VERBOSE} | tr '[:upper:]' '[:lower:]')" = 'yes' ]; then
+            set -x              # Output commands
+        fi
+        set -e                  # Abort on errors
+        cd ${SCRATCH_BUILD}
         
         # Set up environment
         if [ "${F90}" = "none" ]; then
@@ -201,14 +210,15 @@ if [ -z "${HDF5_DIR}" -o "${HDF5_DIR}" = 'BUILD' ]; then
         
         date > ${DONE_FILE}
         echo "HDF5: Done."
-    fi
-)
-
-    if (( $? )); then
-        echo 'BEGIN ERROR'
-        echo 'Error while building HDF5. Aborting.'
-        echo 'END ERROR'
-        exit 1
+        
+        )
+        
+        if (( $? )); then
+            echo 'BEGIN ERROR'
+            echo 'Error while building HDF5. Aborting.'
+            echo 'END ERROR'
+            exit 1
+        fi
     fi
     
 fi
