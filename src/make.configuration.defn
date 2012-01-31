@@ -2,7 +2,7 @@
 
 # Define standard HDF5 utilities
 ALL_UTILS += gif2h5 h52gif h5copy h5debug h5diff h5dump h5import h5jam h5ls h5mkgrp h5perf_serial h5redeploy h5repack h5repart h5stat h5unjam
-ALL_UTILS += h5check
+#ALL_UTILS += h5check
 
 # Ignore some of the utilities that we don't use, e.g. the compiler
 # wrappers:
