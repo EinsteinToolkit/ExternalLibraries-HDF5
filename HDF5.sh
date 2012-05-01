@@ -54,16 +54,34 @@ then
     echo "HDF5 selected, but HDF5_DIR not set. Checking some places..."
     echo "END MESSAGE"
     
-    FILES="include/hdf5.h $(for lib in ${HDF5_CXX_LIBS} ${HDF5_FORTRAN_LIBS} ${HDF5_C_LIBS}; do echo lib/lib${lib}.a; done)"
     DIRS="/usr /usr/local /usr/local/hdf5 /usr/local/packages/hdf5 /usr/local/apps/hdf5 /opt/local ${HOME} ${HOME}/hdf5 c:/packages/hdf5"
+    # look into each directory
     for dir in $DIRS; do
-        HDF5_DIR="$dir"
-        for file in $FILES; do
-            if [ ! -r "$dir/$file" ]; then
-                unset HDF5_DIR
-                break
-            fi
+        # libraries might have different file extensions
+        for libext in a so dylib; do
+            # libraries can be in /lib or /lib64
+            for libdir in lib64 lib; do
+                FILES="include/hdf5.h $(for lib in ${HDF5_CXX_LIBS} ${HDF5_FORTRAN_LIBS} ${HDF5_C_LIBS}; do echo $libdir/lib${lib}.${libext}; done)"
+                # assume this is the one and check all needed files
+                HDF5_DIR="$dir"
+                for file in $FILES; do
+                    # discard this directory if one file was not found
+                    if [ ! -r "$dir/$file" ]; then
+                        unset HDF5_DIR
+                        break
+                    fi
+                done
+                # don't look further if all files have been found
+                if [ -n "$HDF5_DIR" ]; then
+                    break
+                fi
+           done
+           # don't look further if all files have been found
+           if [ -n "$HDF5_DIR" ]; then
+               break
+           fi
         done
+        # don't look further if all files have been found
         if [ -n "$HDF5_DIR" ]; then
             break
         fi
