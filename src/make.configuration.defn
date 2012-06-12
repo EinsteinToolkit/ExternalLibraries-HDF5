@@ -5,7 +5,7 @@ ALL_UTILS += gif2h5 h52gif h5copy h5debug h5diff h5dump h5import h5jam h5ls h5mk
 
 # Install h5check only if it exists
 ifneq ($(wildcard $(HDF5_DIR)/bin/h5check*),)
-ALL_UTILS += h5check	
+ALL_UTILS += h5check
 endif
 
 # Ignore some of the utilities that we don't use, e.g. the compiler
