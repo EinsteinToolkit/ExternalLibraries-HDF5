@@ -128,7 +128,7 @@ then
     HDF5_DIR=${INSTALL_DIR}
     
     if [ -e ${DONE_FILE} -a ${DONE_FILE} -nt ${SRCDIR}/dist/${NAME}.tar.gz \
-                         -a ${DONE_FILE} -nt ${SRCDIR}/HDF5.sh ]
+                         -a ${DONE_FILE} -nt ${SRCDIR}/configure.sh ]
     then
         echo "BEGIN MESSAGE"
         echo "HDF5 has already been built; doing nothing"
