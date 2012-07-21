@@ -54,6 +54,7 @@ then
     echo "HDF5 selected, but HDF5_DIR not set. Checking some places..."
     echo "END MESSAGE"
     
+    # We look in these directories
     DIRS="/usr /usr/local /usr/local/hdf5 /usr/local/packages/hdf5 /usr/local/apps/hdf5 /opt/local ${HOME} ${HOME}/hdf5 c:/packages/hdf5"
     # look into each directory
     for dir in $DIRS; do
@@ -61,7 +62,8 @@ then
         for libext in a so dylib; do
             # libraries can be in /lib or /lib64
             for libdir in lib64 lib; do
-                FILES="include/hdf5.h $(for lib in ${HDF5_CXX_LIBS} ${HDF5_FORTRAN_LIBS} ${HDF5_C_LIBS}; do echo $libdir/lib${lib}.${libext}; done)"
+                # These files must exist
+                FILES="include/hdf5.h $(for lib in ${HDF5_CXX_LIBS} ${HDF5_FORTRAN_LIBS} ${HDF5_C_LIBS}; do echo ${libdir}/lib${lib}.${libext}; done)"
                 # assume this is the one and check all needed files
                 HDF5_DIR="$dir"
                 for file in $FILES; do
@@ -89,7 +91,7 @@ then
     
     if [ -z "$HDF5_DIR" ]; then
         echo "BEGIN MESSAGE"
-        echo "HDF5 not found"
+        echo "Did not find HDF5"
         echo "END MESSAGE"
     else
         echo "BEGIN MESSAGE"
