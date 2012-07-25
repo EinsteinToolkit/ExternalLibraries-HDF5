@@ -10,3 +10,8 @@ PROVIDES HDF5
 REQUIRES HDF5
 
 REQUIRES zlib
+
+# link after MPI in case a parallel-enabled HDF5 version is used
+OPTIONAL MPI
+{
+}
