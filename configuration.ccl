@@ -11,7 +11,7 @@ REQUIRES HDF5
 
 REQUIRES zlib
 
-# link after MPI in case a parallel-enabled HDF5 version is used
+# link before MPI in case a parallel-enabled HDF5 version is used
 OPTIONAL MPI
 {
 }
