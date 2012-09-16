@@ -175,7 +175,7 @@ then
         # Build core library
         echo "HDF5: Unpacking archive..."
         pushd ${BUILD_DIR}
-        ${TAR} xzf ${SRCDIR}/dist/${NAME}.tar.gz
+        ${TAR?} xzf ${SRCDIR}/dist/${NAME}.tar.gz
         
         echo "HDF5: Configuring..."
         cd ${NAME}
@@ -196,7 +196,7 @@ then
         # Build checker
         echo "HDF5: Unpacking checker archive..."
         pushd ${BUILD_DIR}
-        ${TAR} xzf ${SRCDIR}/dist/h5check_2_0.tar.gz
+        ${TAR?} xzf ${SRCDIR}/dist/h5check_2_0.tar.gz
         
         echo "HDF5: Configuring checker..."
         cd h5check_2_0
