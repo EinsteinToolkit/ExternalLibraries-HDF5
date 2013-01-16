@@ -115,7 +115,7 @@ then
     
     # Set locations
     THORN=HDF5
-    NAME=hdf5-1.8.9
+    NAME=hdf5-1.8.10
     SRCDIR=$(dirname $0)
     BUILD_DIR=${SCRATCH_BUILD}/build/${THORN}
     if [ -z "${HDF5_INSTALL_DIR}" ]; then
@@ -326,9 +326,9 @@ echo "HAVE_HDF5           = 1"
 echo "HDF5_DIR            = ${HDF5_DIR}"
 echo "HDF5_ENABLE_CXX     = ${HDF5_ENABLE_CXX}"
 echo "HDF5_ENABLE_FORTRAN = ${HDF5_ENABLE_FORTRAN}"
-echo "HDF5_INC_DIRS       = ${HDF5_INC_DIRS}"
-echo "HDF5_LIB_DIRS       = ${HDF5_LIB_DIRS}"
-echo "HDF5_LIBS           = ${HDF5_LIBS}"
+echo "HDF5_INC_DIRS       = ${HDF5_INC_DIRS} ${ZLIB_INC_DIRS}"
+echo "HDF5_LIB_DIRS       = ${HDF5_LIB_DIRS} ${ZLIB_LIB_DIRS}"
+echo "HDF5_LIBS           = ${HDF5_LIBS} ${ZLIB_LIBS}"
 echo "END MAKE_DEFINITION"
 
 echo 'INCLUDE_DIRECTORY $(HDF5_INC_DIRS)'
