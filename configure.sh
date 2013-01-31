@@ -115,7 +115,7 @@ then
     
     # Set locations
     THORN=HDF5
-    NAME=hdf5-1.8.10
+    NAME=hdf5-1.8.10-patch1
     SRCDIR=$(dirname $0)
     BUILD_DIR=${SCRATCH_BUILD}/build/${THORN}
     if [ -z "${HDF5_INSTALL_DIR}" ]; then
