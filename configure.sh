@@ -182,9 +182,7 @@ then
         # Do not build Fortran API if it has been disabled, or if
         # there is no Fortran 90 compiler.
         # Do not build C++ API if it has been disabled.
-        # Do not build shared library executables if we want to link
-        # statically.
-        ./configure --prefix=${HDF5_DIR} --with-zlib=${ZLIB_DIR} --enable-cxx=${HDF5_ENABLE_CXX} $(if [ -n "${FC}" ]; then echo '' "--enable-fortran=${HDF5_ENABLE_FORTRAN}"; fi) $(if echo '' "${LDFLAGS}" | grep -q '[-]static'; then echo '' '--disable-shared --enable-static-exec'; fi)
+        ./configure --prefix=${HDF5_DIR} --with-zlib=${ZLIB_DIR} --enable-cxx=${HDF5_ENABLE_CXX} $(if [ -n "${FC}" ]; then echo '' "--enable-fortran=${HDF5_ENABLE_FORTRAN}"; fi) --disable-shared --enable-static-exec
         
         echo "HDF5: Building..."
         ${MAKE}
@@ -230,7 +228,6 @@ then
         
         date > ${DONE_FILE}
         echo "HDF5: Done."
-        
         )
         
         if (( $? )); then
