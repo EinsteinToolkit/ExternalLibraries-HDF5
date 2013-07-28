@@ -159,6 +159,7 @@ then
             export FCFLAGS="${F90FLAGS}"
         fi
         export LDFLAGS
+        unset CPP
         unset LIBS
         unset RPATH
         if echo '' ${ARFLAGS} | grep 64 > /dev/null 2>&1; then
