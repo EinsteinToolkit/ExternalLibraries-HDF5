@@ -158,6 +158,10 @@ then
             export FC="${F90}"
             export FCFLAGS="${F90FLAGS}"
         fi
+        for dir in $SYS_INC_DIRS; do
+            CPPFLAGS="$CPPFLAGS -I$dir"
+        done
+        export CPPFLAGS
         export LDFLAGS
         unset CPP
         unset LIBS
