@@ -32,7 +32,7 @@ fi
 # Set up names of the libraries based on configuration variables. Also
 # assign default values to variables.
 HDF5_C_LIBS='hdf5_hl hdf5'
-if [ "${HDF5_ENABLE_CXX:=yes}" = 'yes' ]; then
+if [ "${HDF5_ENABLE_CXX:=no}" = 'yes' ]; then
     HDF5_CXX_LIBS='hdf5_hl_cpp hdf5_cpp'
 fi
 if [ "${HDF5_ENABLE_FORTRAN:=yes}" = 'yes' ]; then
