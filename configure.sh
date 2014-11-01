@@ -131,7 +131,7 @@ then
     # Set locations
     THORN=HDF5
     NAME=hdf5-1.8.13
-    SRCDIR=$(dirname $0)
+    SRCDIR="$(dirname $0)"
     BUILD_DIR=${SCRATCH_BUILD}/build/${THORN}
     if [ -z "${HDF5_INSTALL_DIR}" ]; then
         INSTALL_DIR=${SCRATCH_BUILD}/external/${THORN}
@@ -267,15 +267,9 @@ fi
 ################################################################################
 
 # Set options
-if [ "${HDF5_DIR}" = '/usr' -o "${HDF5_DIR}" = '/usr/local' ]; then
-    # Fortran modules may be located in the lib directory
-    HDF5_INC_DIRS='${HDF5_DIR}/lib'
-    HDF5_LIB_DIRS=''
-else
-    # Fortran modules may be located in the lib directory
-    HDF5_INC_DIRS="${HDF5_DIR}/include ${HDF5_DIR}/lib"
-    HDF5_LIB_DIRS="${HDF5_DIR}/lib"
-fi
+# Fortran modules may be located in the lib directory
+HDF5_INC_DIRS="${HDF5_DIR}/include ${HDF5_DIR}/lib"
+HDF5_LIB_DIRS="${HDF5_DIR}/lib"
 HDF5_LIBS="${HDF5_CXX_LIBS} ${HDF5_FORTRAN_LIBS} ${HDF5_C_LIBS}"
 
 
@@ -337,9 +331,14 @@ fi
 # Configure Cactus
 ################################################################################
 
+HDF5_INC_DIRS="$(${CCTK_HOME}/lib/sbin/strip-incdirs.sh ${HDF5_INC_DIRS})"
+HDF5_LIB_DIRS="$(${CCTK_HOME}/lib/sbin/strip-libdirs.sh ${HDF5_LIB_DIRS})"
+
+ZLIB_INC_DIRS="$(${CCTK_HOME}/lib/sbin/strip-incdirs.sh ${ZLIB_INC_DIRS})"
+ZLIB_LIB_DIRS="$(${CCTK_HOME}/lib/sbin/strip-libdirs.sh ${ZLIB_LIB_DIRS})"
+
 # Pass options to Cactus
 echo "BEGIN MAKE_DEFINITION"
-echo "HAVE_HDF5           = 1"
 echo "HDF5_DIR            = ${HDF5_DIR}"
 echo "HDF5_ENABLE_CXX     = ${HDF5_ENABLE_CXX}"
 echo "HDF5_ENABLE_FORTRAN = ${HDF5_ENABLE_FORTRAN}"
