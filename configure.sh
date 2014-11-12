@@ -320,6 +320,18 @@ if [ $test_zlib -eq 0 ]; then
     fi
 fi
 
+# Check whether we have to link with MPI
+if grep -qe '#define H5_HAVE_PARALLEL 1' ${HDF5_DIR}/include/H5pubconf.h 2> /dev/null; then
+    test_mpi=0
+else
+    test_mpi=1
+fi
+if [ $test_mpi -eq 0 ]; then
+    HDF5_LIB_DIRS="$HDF5_LIB_DIRS $MPI_LIB_DIRS"
+    HDF5_INC_DIRS="$HDF5_INC_DIRS $MPI_INC_DIRS"
+    HDF5_LIBS="$HDF5_LIBS $MPI_LIBS"
+fi
+
 # Add the math library which might not be linked by default
 if [ $is_windows -eq 0 ]; then
     HDF5_LIBS="$HDF5_LIBS m"
