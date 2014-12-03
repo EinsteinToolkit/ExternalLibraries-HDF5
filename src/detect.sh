@@ -111,22 +111,24 @@ then
     echo "Using bundled HDF5..."
     echo "END MESSAGE"
     
-    # check for required tools. Do this here so that we don't require them when
-    # using the system library
-    if [ x$TAR = x ] ; then
-      echo 'BEGIN ERROR'
-      echo 'Could not find tar command. Please make sure that (gnu) tar is present'
-      echo 'and that the TAR variable is set to its location.'
-      echo 'END ERROR'
-      exit 1
+    # Check for required tools. Do this here so that we don't require
+    # them when using the system library.
+    if [ "x$TAR" = x ] ; then
+        echo 'BEGIN ERROR'
+        echo 'Could not find tar command.'
+        echo 'Please make sure that the (GNU) tar command is present,'
+        echo 'and that the TAR variable is set to its location.'
+        echo 'END ERROR'
+        exit 1
     fi
-    #if [ x$PATCH = x ] ; then
-    #  echo 'BEGIN ERROR'
-    #  echo 'Could not find patch command. Please make sure that (gnu) tar is present'
-    #  echo 'and that the PATCH variable is set to its location.'
-    #  echo 'END ERROR'
-    #  exit 1
-    #fi
+    if [ "x$PATCH" = x ] ; then
+        echo 'BEGIN ERROR'
+        echo 'Could not find patch command.'
+        echo 'Please make sure that the patch command is present,'
+        echo 'and that the PATCH variable is set to its location.'
+        echo 'END ERROR'
+        exit 1
+    fi
 
     # Set locations
     THORN=HDF5
@@ -143,121 +145,11 @@ then
     fi
     DONE_FILE=${SCRATCH_BUILD}/done/${THORN}
     HDF5_DIR=${INSTALL_DIR}
-    
-    if [ -e ${DONE_FILE} -a ${DONE_FILE} -nt ${SRCDIR}/dist/${NAME}.tar.gz \
-                         -a ${DONE_FILE} -nt ${SRCDIR}/configure.sh ]
-    then
-        echo "BEGIN MESSAGE"
-        echo "HDF5 has already been built; doing nothing"
-        echo "END MESSAGE"
-    else
-        echo "BEGIN MESSAGE"
-        echo "Building HDF5"
-        echo "END MESSAGE"
-        
-        # Build in a subshell
-        (
-        exec >&2                # Redirect stdout to stderr
-        if [ "$(echo ${VERBOSE} | tr '[:upper:]' '[:lower:]')" = 'yes' ]; then
-            set -x              # Output commands
-        fi
-        set -e                  # Abort on errors
-        cd ${SCRATCH_BUILD}
-        
-        # Set up environment
-        if [ "${F90}" = "none" ]; then
-            echo 'BEGIN MESSAGE'
-            echo 'No Fortran 90 compiler available. Building HDF5 library without Fortran support.'
-            echo 'END MESSAGE'
-            unset FC
-            unset FCFLAGS
-        else
-            export FC="${F90}"
-            export FCFLAGS="${F90FLAGS}"
-        fi
-        for dir in $SYS_INC_DIRS; do
-            CPPFLAGS="$CPPFLAGS -I$dir"
-        done
-        export CPPFLAGS
-        export LDFLAGS
-        unset CPP
-        unset LIBS
-        unset RPATH
-        if echo '' ${ARFLAGS} | grep 64 > /dev/null 2>&1; then
-            export OBJECT_MODE=64
-        fi
-        
-        echo "HDF5: Preparing directory structure..."
-        mkdir build external done 2> /dev/null || true
-        rm -rf ${BUILD_DIR} ${INSTALL_DIR}
-        mkdir ${BUILD_DIR} ${INSTALL_DIR}
-        
-        # Build core library
-        echo "HDF5: Unpacking archive..."
-        pushd ${BUILD_DIR}
-        ${TAR?} xzf ${SRCDIR}/dist/${NAME}.tar.gz
-        
-        echo "HDF5: Configuring..."
-        cd ${NAME}
-        # Do not build Fortran API if it has been disabled, or if
-        # there is no Fortran 90 compiler.
-        # Do not build C++ API if it has been disabled.
-        ./configure --prefix=${HDF5_DIR} --with-zlib=${ZLIB_DIR} --enable-cxx=${HDF5_ENABLE_CXX} $(if [ -n "${FC}" ]; then echo '' "--enable-fortran=${HDF5_ENABLE_FORTRAN} --enable-fortran2003=${HDF5_ENABLE_FORTRAN}"; fi) --disable-shared --enable-static-exec
-        
-        echo "HDF5: Building..."
-        ${MAKE}
-        
-        echo "HDF5: Installing..."
-        ${MAKE} install
-        popd
-        
-        # Build checker
-        echo "HDF5: Unpacking checker archive..."
-        pushd ${BUILD_DIR}
-        ${TAR?} xzf ${SRCDIR}/dist/h5check_2_0.tar.gz
-        
-        echo "HDF5: Configuring checker..."
-        cd h5check_2_0
-        # Point the checker to the just-installed library
-        export CPPFLAGS="${CPPFLAGS} -I${HDF5_DIR}/include"
-        export LDFLAGS="${LDFLAGS} -L${HDF5_DIR}/lib"
-        export H5CC="${CC}"
-        export H5CC_PP="${CPP}"
-        export H5FC="${FC}"
-        export H5FC_PP="${FPP}"
-        export H5CPP="${CXX}"
-        ./configure --prefix=${HDF5_DIR} --with-zlib=${ZLIB_DIR}
-        
-        echo "HDF5: Building checker..."
-        #${MAKE}
-        (cd src && ${MAKE})
-        (cd tool && ${MAKE})
-        
-        echo "HDF5: Installing checker..."
-        # The build fails in the "test" subdirectory, because
-        # /usr/include/hdf5.h (if it exists) is used instead of the
-        # the one we just installed. We therefore skip the build in
-        # the "test" subdirectory.
-        #${MAKE} install
-        (cd src && ${MAKE} install)
-        (cd tool && ${MAKE} install)
-        popd
-
-        echo "HDF5: Cleaning up..."
-        rm -rf ${BUILD_DIR}
-        
-        date > ${DONE_FILE}
-        echo "HDF5: Done."
-        )
-        
-        if (( $? )); then
-            echo 'BEGIN ERROR'
-            echo 'Error while building HDF5. Aborting.'
-            echo 'END ERROR'
-            exit 1
-        fi
-    fi
-    
+else    
+    THORN=HDF5
+    DONE_FILE=${SCRATCH_BUILD}/done/${THORN}
+    mkdir ${SCRATCH_BUILD}/done 2> /dev/null || true
+    date > ${DONE_FILE}
 fi
 
 
@@ -342,6 +234,15 @@ fi
 ################################################################################
 # Configure Cactus
 ################################################################################
+
+# Pass configuration options to build script
+echo "BEGIN MAKE_DEFINITION"
+echo "HDF5_ENABLE_CXX     = ${HDF5_ENABLE_CXX}"
+echo "HDF5_ENABLE_FORTRAN = ${HDF5_ENABLE_FORTRAN}"
+echo "LIBSZ_DIR           = ${LIBSZ_DIR}"
+echo "LIBZ_DIR            = ${LIBZ_DIR}"
+echo "HDF5_INSTALL_DIR    = ${HDF5_INSTALL_DIR}"
+echo "END MAKE_DEFINITION"
 
 HDF5_INC_DIRS="$(${CCTK_HOME}/lib/sbin/strip-incdirs.sh ${HDF5_INC_DIRS})"
 HDF5_LIB_DIRS="$(${CCTK_HOME}/lib/sbin/strip-libdirs.sh ${HDF5_LIB_DIRS})"
