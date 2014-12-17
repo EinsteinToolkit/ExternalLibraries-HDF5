@@ -85,7 +85,7 @@ echo "HDF5: Configuring checker..."
 cd h5check_2_0
 # Point the checker to the just-installed library
 export CPPFLAGS="${CPPFLAGS} -I${HDF5_DIR}/include"
-export LDFLAGS="${LDFLAGS} -L${HDF5_DIR}/lib -Wl,-rpath,${HDF5_DIR}/lib"
+export LDFLAGS="${LDFLAGS} ${LIBDIR_PREFIX}${HDF5_DIR}/lib ${RUNDIR_PREFIX}${HDF5_DIR}/lib"
 export H5CC="${CC}"
 export H5CC_PP="${CPP}"
 export H5FC="${FC}"
