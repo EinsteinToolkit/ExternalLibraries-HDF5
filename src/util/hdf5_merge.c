@@ -92,7 +92,7 @@ static herr_t CopyAttribute (hid_t src, const char *attr_name, void *arg);
 int main (int argc, char *argv[])
 {
   int i;
-  hid_t *infiles, outfile;
+  hid_t infile, outfile;
 
 
   /* give some help if called with incorrect number of parameters */
@@ -106,17 +106,18 @@ int main (int argc, char *argv[])
 
   H5E_BEGIN_TRY
   {
-    /* open the input files */
-    infiles = (hid_t *) malloc ((argc - 2) * sizeof (hid_t));
+    /* open the input files as early test that this works */
     for (i = 0; i < argc - 2; i++)
     {
-      infiles[i] = H5Fopen (argv[i + 1], H5F_ACC_RDONLY, H5P_DEFAULT);
-      if (infiles[i] < 0)
+      infile = H5Fopen (argv[i + 1], H5F_ACC_RDONLY, H5P_DEFAULT);
+      if (infile < 0)
       {
         fprintf (stderr, "ERROR: Cannot open HDF5 input file '%s' !\n\n",
                  argv[i + 1]);
         return (-1);
       }
+      /* close them again, or we might have too many open files and fail */
+      H5Fclose (infile);
     }
 
     /* try to open an existing outfile file in append mode,
@@ -145,16 +146,21 @@ int main (int argc, char *argv[])
     printf ("\n  Merging objects from input file '%s' into output file '%s'\n",
             argv[i + 1], argv[argc-1]);
     pathname = "";
-    CHECK_ERROR (H5Giterate (infiles[i], "/", NULL, CopyObject, &outfile));
+    H5E_BEGIN_TRY
+    {
+      infile = H5Fopen (argv[i + 1], H5F_ACC_RDONLY, H5P_DEFAULT);
+      if (infile < 0)
+      {
+        fprintf (stderr, "ERROR: Cannot open HDF5 input file '%s' !\n\n",
+                 argv[i + 1]);
+        return (-1);
+      }
+    } H5E_END_TRY
+    CHECK_ERROR (H5Giterate (infile, "/", NULL, CopyObject, &outfile));
+    CHECK_ERROR (H5Fclose (infile));
   }
 
-  /* finally, close all open files */
-  for (i = 0; i < argc - 2; i++)
-  {
-    CHECK_ERROR (H5Fclose (infiles[i]));
-  }
   CHECK_ERROR (H5Fclose (outfile));
-  free (infiles);
 
   /* report status */
   if (nerrors == 0)
