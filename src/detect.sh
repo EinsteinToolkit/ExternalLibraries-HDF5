@@ -159,7 +159,7 @@ fi
 ################################################################################
 
 # Set library directory name for machine architecture
-if machine=$(gcc -dumpversion 2>/dev/null); then
+if machine=$(gcc -dumpmachine 2>/dev/null); then
     machinedir="${HDF5_DIR}/lib/${machine}"
 else
     machinedir=''
