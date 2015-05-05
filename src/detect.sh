@@ -158,19 +158,17 @@ fi
 # Check for additional libraries
 ################################################################################
 
-# Set library directory name for machine architecture:
-gcc -dumpversion > /dev/null 2>&1
-
-if [ $? -eq 0 ]; then
-  MACHINE=${MACHINE:=`gcc -dumpmachine`}
+# Set library directory name for machine architecture
+if machine=$(gcc -dumpversion 2>/dev/null); then
+    machinedir="${HDF5_DIR}/lib/${machine}"
 else
-  MACHINE=${MACHINE:=""}
+    machinedir=''
 fi
 
 # Set options
 # Fortran modules may be located in the lib directory
-HDF5_INC_DIRS="${HDF5_DIR}/include ${HDF5_DIR}/lib/${MACHINE} ${HDF5_DIR}/lib"
-HDF5_LIB_DIRS="${HDF5_DIR}/lib/${MACHINE} ${HDF5_DIR}/lib"
+HDF5_INC_DIRS="${HDF5_DIR}/include ${machinedir} ${HDF5_DIR}/lib"
+HDF5_LIB_DIRS="${machinedir} ${HDF5_DIR}/lib"
 HDF5_LIBS="${HDF5_CXX_LIBS} ${HDF5_FORTRAN_LIBS} ${HDF5_C_LIBS}"
 
 
