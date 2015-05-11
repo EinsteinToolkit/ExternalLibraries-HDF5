@@ -158,17 +158,10 @@ fi
 # Check for additional libraries
 ################################################################################
 
-# Set library directory name for machine architecture
-if machine=$(gcc -dumpmachine 2>/dev/null); then
-    machinedir="${HDF5_DIR}/lib/${machine}"
-else
-    machinedir=''
-fi
-
 # Set options
 # Fortran modules may be located in the lib directory
-HDF5_INC_DIRS="${HDF5_DIR}/include ${machinedir} ${HDF5_DIR}/lib"
-HDF5_LIB_DIRS="${machinedir} ${HDF5_DIR}/lib"
+HDF5_INC_DIRS="${HDF5_DIR}/include ${HDF5_DIR}/lib"
+HDF5_LIB_DIRS="${HDF5_DIR}/lib"
 HDF5_LIBS="${HDF5_CXX_LIBS} ${HDF5_FORTRAN_LIBS} ${HDF5_C_LIBS}"
 
 
