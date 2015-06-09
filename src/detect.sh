@@ -8,7 +8,7 @@
 if [ "$(echo ${VERBOSE} | tr '[:upper:]' '[:lower:]')" = 'yes' ]; then
     set -x                      # Output commands
 fi
-#set -e                          # Abort on errors
+set -e                          # Abort on errors
 
 . $CCTK_HOME/lib/make/bash_utils.sh
 
