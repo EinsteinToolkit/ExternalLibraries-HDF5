@@ -57,8 +57,8 @@ if [ -z "${HDF5_DIR}" ]; then
     # look into each directory
     for dir in $DIRS; do
         # libraries might have different file extensions
-        for libext in a so dylib; do
-            # libraries can be in /lib or /lib64
+        for libext in a dll dylib lib so; do
+            # libraries can be in lib or lib64 (or libx32?)
             for libdir in lib64 lib; do
                 # These files must exist
                 FILES="include/hdf5.h $(for lib in ${HDF5_CXX_LIBS} ${HDF5_FORTRAN_LIBS} ${HDF5_C_LIBS}; do echo ${libdir}/lib${lib}.${libext}; done)"
@@ -166,22 +166,6 @@ HDF5_LIBS="${HDF5_CXX_LIBS} ${HDF5_FORTRAN_LIBS} ${HDF5_C_LIBS}"
 
 
 
-# Check whether we are running on Windows
-if perl -we 'exit (`uname` =~ /^CYGWIN/)'; then
-    is_windows=0
-else
-    is_windows=1
-fi
-
-# Check whether we are running on MacOS
-if perl -we 'exit (`uname` =~ /^Darwin/)'; then
-    is_macos=0
-else
-    is_macos=1
-fi
-
-
-
 # Check whether we have to link with libsz.a
 if grep -qe '#define H5_HAVE_LIBSZ 1' ${HDF5_DIR}/include/H5pubconf.h 2> /dev/null; then
     test_szlib=0
@@ -190,11 +174,7 @@ else
 fi
 if [ $test_szlib -eq 0 ]; then
     HDF5_LIB_DIRS="$HDF5_LIB_DIRS $LIBSZ_DIR"
-    if [ $is_windows -eq 0 ]; then
-        HDF5_LIBS="$HDF5_LIBS sz"
-    else
-        HDF5_LIBS="$HDF5_LIBS szlib"
-    fi
+    HDF5_LIBS="$HDF5_LIBS sz"
 fi
 
 # Check whether we have to link with libz.a
@@ -205,11 +185,7 @@ else
 fi
 if [ $test_zlib -eq 0 ]; then
     HDF5_LIB_DIRS="$HDF5_LIB_DIRS $LIBZ_DIR"
-    if [ $is_windows -eq 0 ]; then
-        HDF5_LIBS="$HDF5_LIBS z"
-    else
-        HDF5_LIBS="$HDF5_LIBS zlib"
-    fi
+    HDF5_LIBS="$HDF5_LIBS z"
 fi
 
 # Check whether we have to link with MPI
@@ -225,9 +201,7 @@ if [ $test_mpi -eq 0 ]; then
 fi
 
 # Add the math library which might not be linked by default
-if [ $is_windows -eq 0 ]; then
-    HDF5_LIBS="$HDF5_LIBS m"
-fi
+HDF5_LIBS="$HDF5_LIBS m"
 
 
 
