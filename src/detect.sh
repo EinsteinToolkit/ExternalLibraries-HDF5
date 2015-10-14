@@ -151,6 +151,7 @@ else
     echo 'BEGIN ERROR'
     echo 'ERROR in HDF5 configuration: Could neither find nor build library.'
     echo 'END ERROR'
+    exit 1
 fi
 
 ################################################################################
@@ -178,6 +179,7 @@ if [ -z "$HDF5_BUILD" -a -n "${HDF5_DIR}" ]; then
       echo 'ERROR in HDF5 configuration: '
       echo "H5pubconf.h not found in $HDF5_RAW_INC_DIRS"
       echo 'END ERROR'
+      exit 1
   fi
 
   # Check whether we have to link with libsz.a
