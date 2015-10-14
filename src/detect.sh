@@ -142,8 +142,11 @@ else
 fi
 
 if [ -n "$HDF5_DIR" ]; then
-    # Fortran modules may be located in the lib directory
+    if [ -d "${HDF5_DIR}/include" ]; then
+      : ${HDF5_INC_DIRS="${HDF5_DIR}/include"}
+    fi
     : ${HDF5_RAW_LIB_DIRS:="$HDF5_LIB_DIRS"}
+    # Fortran modules may be located in the lib directory
     HDF5_INC_DIRS="$HDF5_RAW_LIB_DIRS $HDF5_INC_DIRS"
     # We need the un-scrubbed inc dirs to look for a header file below.
     : ${HDF5_RAW_INC_DIRS:="$HDF5_INC_DIRS"}
