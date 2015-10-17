@@ -15,7 +15,6 @@ set -e                          # Abort on errors
 ################################################################################
 # Check for old mechanism
 ################################################################################
-
 if [ -n "${HDF5}" ]; then
     echo 'BEGIN ERROR'
     echo "Setting the option \"HDF5\" is incompatible with the HDF5 thorn. Please remove the option HDF5=${HDF5}."
@@ -56,11 +55,8 @@ if [ -n "$HDF5_REQ" ]; then
 fi
 HDF5_REQ_LIBS="${HDF5_CXX_LIBS} ${HDF5_FORTRAN_LIBS} ${HDF5_C_LIBS}"
 
-################################################################################
-# Search
-################################################################################
-
-if [ -z "${HDF5_DIR}" -o -z "${HDF5_BUILD}" ]; then
+# Try to find the library if build isn't explicitly requested
+if [ -z "${HDF5_BUILD}" ]; then
     find_lib HDF5 hdf5 1 1.0 "$HDF5_REQ_LIBS" "hdf5.h" "$HDF5_DIR"
 
     # Sadly, pkg-config for HDF5 is good for paths, but bad for the list of
@@ -106,11 +102,9 @@ if [ -z "${HDF5_DIR}" -o -z "${HDF5_BUILD}" ]; then
     fi
 fi
 
-################################################################################
-# Build
-################################################################################
 THORN=HDF5
 
+# configure library if build was requested or is needed (no usable library found)
 if [ -n "$HDF5_BUILD" -o -z "${HDF5_DIR}" ]; then
     echo "BEGIN MESSAGE"
     echo "Using bundled HDF5..."
