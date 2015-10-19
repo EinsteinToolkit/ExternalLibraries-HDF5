@@ -109,6 +109,7 @@ if [ -n "$HDF5_BUILD" -o -z "${HDF5_DIR}" ]; then
     echo "BEGIN MESSAGE"
     echo "Using bundled HDF5..."
     echo "END MESSAGE"
+    HDF5_BUILD="yes"
 
     check_tools "tar patch"
     
