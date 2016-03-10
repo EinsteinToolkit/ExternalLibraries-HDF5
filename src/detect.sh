@@ -56,7 +56,7 @@ fi
 HDF5_REQ_LIBS="${HDF5_CXX_LIBS} ${HDF5_FORTRAN_LIBS} ${HDF5_C_LIBS}"
 
 # Try to find the library if build isn't explicitly requested
-if [ -z "${HDF5_BUILD}" -a -z "${HDF5_INC_DIRS}" -a -z "${HDF_LIB_DIRS}" -a "${HDF5_LIBS}" ]; then
+if [ -z "${HDF5_BUILD}" -a -z "${HDF5_INC_DIRS}" -a -z "${HDF5_LIB_DIRS}" -a "${HDF5_LIBS}" ]; then
     find_lib HDF5 hdf5 1 1.0 "$HDF5_REQ_LIBS" "hdf5.h" "$HDF5_DIR"
 
     # Sadly, pkg-config for HDF5 is good for paths, but bad for the list of
