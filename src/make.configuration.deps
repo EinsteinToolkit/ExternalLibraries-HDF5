@@ -14,7 +14,7 @@ $(UTIL_DIR)/%: $(HDF5_DIR)/bin/%
 HDF5_BUILD_DIR = $(BUILD_DIR)/HDF5
 HDF5_SRC_DIR   = $(PACKAGE_DIR)/ExternalLibraries/HDF5/src/util
 
-HDF5_CFLAGS  = $(CPPFLAGS) -DCCODE -I$(CONFIG) -I$(BINDINGS_DIR)/include -I$(BINDINGS_DIR)/include/HDF5 -I$(FLESH_DIR)/include $(HDF5_INC_DIRS:%=-I%) $(CFLAGS)
+HDF5_CFLAGS  = $(CPPFLAGS) -DCCODE -I$(CONFIG) -I$(BINDINGS_DIR)/include -I$(BINDINGS_DIR)/include/HDF5 -I$(FLESH_DIR)/include $(HDF5_INC_DIRS:%=-I%) $(MPI_INC_DIRS:%=-I%) $(CFLAGS)
 HDF5_LDFLAGS = $(DEBUG_LD) $(LDFLAGS) $(CXXFLAGS) $(EXTRAFLAGS) $(GENERAL_LIBRARIES)
 
 
@@ -29,4 +29,4 @@ $(HDF5_BUILD_DIR)/%.o: $(HDF5_SRC_DIR)/%.c
 $(UTIL_DIR)/%: $(HDF5_BUILD_DIR)/%.o
 	@echo "Creating $* in $(UTIL_DIR) from $<"
 	-$(MKDIR) $(MKDIRFLAGS) $(UTIL_DIR) 2> /dev/null
-	$(LD) $< $(HDF5_LDFLAGS) -o $@
+	$(LD) $< -o $@ $(HDF5_LDFLAGS)

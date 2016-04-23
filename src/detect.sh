@@ -104,7 +104,8 @@ fi
 
 THORN=HDF5
 
-# configure library if build was requested or is needed (no usable library found)
+# configure library if build was requested or is needed (no usable
+# library found)
 if [ -n "$HDF5_BUILD" -o -z "${HDF5_DIR}" ]; then
     echo "BEGIN MESSAGE"
     echo "Using bundled HDF5..."
@@ -131,9 +132,11 @@ if [ -n "$HDF5_BUILD" -o -z "${HDF5_DIR}" ]; then
     HDF5_LIB_DIRS="${HDF5_DIR}/lib"
     HDF5_LIBS="${HDF5_CXX_LIBS} ${HDF5_FORTRAN_LIBS} ${HDF5_C_LIBS}"
 else
-    mkdir ${SCRATCH_BUILD}/done 2> /dev/null || true
     DONE_FILE=${SCRATCH_BUILD}/done/${THORN}
-    date > ${DONE_FILE}
+    if [ ! -e ${DONE_FILE} ]; then
+        mkdir ${SCRATCH_BUILD}/done 2> /dev/null || true
+        date > ${DONE_FILE}
+    fi
 fi
 
 if [ -n "$HDF5_DIR" ]; then

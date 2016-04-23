@@ -29,7 +29,7 @@ DONE_FILE=${SCRATCH_BUILD}/done/${THORN}
 HDF5_DIR=${INSTALL_DIR}
 
 # Set up environment
-if [ "${F90}" = "none" ]; then
+if [[ ${F90} == none ]]; then
     echo 'BEGIN MESSAGE'
     echo 'No Fortran 90 compiler available. Building HDF5 library without Fortran support.'
     echo 'END MESSAGE'
@@ -64,10 +64,16 @@ ${TAR?} xzf ${SRCDIR}/../dist/${NAME}.tar.gz
 
 echo "HDF5: Configuring..."
 cd ${NAME}
+# Do not build C++ API if it has been disabled.
+: ${HDF5_ENABLE_CXX:=yes}
 # Do not build Fortran API if it has been disabled, or if there is no
 # Fortran 90 compiler.
-# Do not build C++ API if it has been disabled.
-./configure --prefix=${HDF5_DIR} --with-zlib=${ZLIB_DIR} --enable-cxx=${HDF5_ENABLE_CXX} $(if [ -n "${FC}" ]; then echo '' "--enable-fortran=${HDF5_ENABLE_FORTRAN} --enable-fortran2003=${HDF5_ENABLE_FORTRAN}"; fi) --disable-shared --enable-static-exec
+if [[ -n ${FC} ]]; then
+    : ${HDF5_ENABLE_FORTRAN:=yes}
+else
+    HDF5_ENABLE_FORTRAN=no
+fi
+./configure --prefix=${HDF5_DIR} --with-zlib=${ZLIB_DIR} --enable-cxx=${HDF5_ENABLE_CXX} --enable-fortran=${HDF5_ENABLE_FORTRAN} --enable-fortran2003=${HDF5_ENABLE_FORTRAN} --disable-shared --enable-static-exec
 
 echo "HDF5: Building..."
 ${MAKE}
