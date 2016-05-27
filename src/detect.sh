@@ -167,15 +167,19 @@ fi
 # check installed library, assume that everything is fine if we build
 if [ -z "$HDF5_BUILD" -a -n "${HDF5_DIR}" ]; then
   # find public include file
+  H5PUBCONFFILES="H5pubconf.h H5pubconf-64.h H5pubconf-32.h"
   for dir in $HDF5_RAW_INC_DIRS; do
-      if [ -r "$dir/H5pubconf.h" ]; then
-          H5PUBCONF="$H5PUBCONF $dir/H5pubconf.h"
-      fi
+      for file in $H5PUBCONFFILES ; do
+          if [ -r "$dir/$file" ]; then
+              H5PUBCONF="$H5PUBCONF $dir/$file"
+              break
+          fi
+      done
   done
   if [ -z "$H5PUBCONF" ]; then
       echo 'BEGIN MESSAGE'
       echo 'WARNING in HDF5 configuration: '
-      echo "H5pubconf.h not found in $HDF5_RAW_INC_DIRS"
+      echo "None of $H5PUBCONFFILES found in $HDF5_RAW_INC_DIRS"
       echo "Automatic detection of szip/zlib compression not possible"
       echo 'END MESSAGE'
   else
