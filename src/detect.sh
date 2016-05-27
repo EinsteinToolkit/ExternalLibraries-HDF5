@@ -173,45 +173,46 @@ if [ -z "$HDF5_BUILD" -a -n "${HDF5_DIR}" ]; then
       fi
   done
   if [ -z "$H5PUBCONF" ]; then
-      echo 'BEGIN ERROR'
-      echo 'ERROR in HDF5 configuration: '
+      echo 'BEGIN MESSAGE'
+      echo 'WARNING in HDF5 configuration: '
       echo "H5pubconf.h not found in $HDF5_RAW_INC_DIRS"
-      echo 'END ERROR'
-      exit 1
-  fi
-
-  # Check whether we have to link with libsz.a
-  if grep -qe '#define H5_HAVE_LIBSZ 1' $H5PUBCONF 2> /dev/null; then
-      test_szlib=0
+      echo "Automatic detection of szip/zlib compression not possible"
+      echo 'END MESSAGE'
   else
-      test_szlib=1
-  fi
-  if [ $test_szlib -eq 0 ]; then
-      HDF5_LIB_DIRS="$HDF5_LIB_DIRS $LIBSZ_DIR"
-      HDF5_LIBS="$HDF5_LIBS sz"
-  fi
 
-  # Check whether we have to link with libz.a
-  if grep -qe '#define H5_HAVE_LIBZ 1' $H5PUBCONF 2> /dev/null; then
-      test_zlib=0
-  else
-      test_zlib=1
-  fi
-  if [ $test_zlib -eq 0 ]; then
-      HDF5_LIB_DIRS="$HDF5_LIB_DIRS $LIBZ_DIR"
-      HDF5_LIBS="$HDF5_LIBS z"
-  fi
+      # Check whether we have to link with libsz.a
+      if grep -qe '#define H5_HAVE_LIBSZ 1' $H5PUBCONF 2> /dev/null; then
+          test_szlib=0
+      else
+          test_szlib=1
+      fi
+      if [ $test_szlib -eq 0 ]; then
+          HDF5_LIB_DIRS="$HDF5_LIB_DIRS $LIBSZ_DIR"
+          HDF5_LIBS="$HDF5_LIBS sz"
+      fi
 
-  # Check whether we have to link with MPI
-  if grep -qe '#define H5_HAVE_PARALLEL 1' $H5PUBCONF 2> /dev/null; then
-      test_mpi=0
-  else
-      test_mpi=1
-  fi
-  if [ $test_mpi -eq 0 ]; then
-      HDF5_LIB_DIRS="$HDF5_LIB_DIRS $MPI_LIB_DIRS"
-      HDF5_INC_DIRS="$HDF5_INC_DIRS $MPI_INC_DIRS"
-      HDF5_LIBS="$HDF5_LIBS $MPI_LIBS"
+      # Check whether we have to link with libz.a
+      if grep -qe '#define H5_HAVE_LIBZ 1' $H5PUBCONF 2> /dev/null; then
+          test_zlib=0
+      else
+          test_zlib=1
+      fi
+      if [ $test_zlib -eq 0 ]; then
+          HDF5_LIB_DIRS="$HDF5_LIB_DIRS $LIBZ_DIR"
+          HDF5_LIBS="$HDF5_LIBS z"
+      fi
+
+      # Check whether we have to link with MPI
+      if grep -qe '#define H5_HAVE_PARALLEL 1' $H5PUBCONF 2> /dev/null; then
+          test_mpi=0
+      else
+          test_mpi=1
+      fi
+      if [ $test_mpi -eq 0 ]; then
+          HDF5_LIB_DIRS="$HDF5_LIB_DIRS $MPI_LIB_DIRS"
+          HDF5_INC_DIRS="$HDF5_INC_DIRS $MPI_INC_DIRS"
+          HDF5_LIBS="$HDF5_LIBS $MPI_LIBS"
+      fi
   fi
 fi
 
