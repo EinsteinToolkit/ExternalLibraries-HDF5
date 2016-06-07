@@ -25,7 +25,7 @@ fi
 # Take care of requests to build the library in any case
 HDF5_DIR_INPUT=$HDF5_DIR
 if [ "$(echo "${HDF5_DIR}" | tr '[a-z]' '[A-Z]')" = 'BUILD' ]; then
-    HDF5_BUILD=yes
+    HDF5_BUILD=1
     HDF5_DIR=
 else
     HDF5_BUILD=
@@ -110,7 +110,7 @@ if [ -n "$HDF5_BUILD" -o -z "${HDF5_DIR}" ]; then
     echo "BEGIN MESSAGE"
     echo "Using bundled HDF5..."
     echo "END MESSAGE"
-    HDF5_BUILD="yes"
+    HDF5_BUILD=1
 
     check_tools "tar patch"
     
@@ -233,6 +233,7 @@ fi
 
 # Pass configuration options to build script
 echo "BEGIN MAKE_DEFINITION"
+echo "HDF5_BUILD          = ${HDF5_BUILD}"
 echo "HDF5_ENABLE_CXX     = ${HDF5_ENABLE_CXX}"
 echo "HDF5_ENABLE_FORTRAN = ${HDF5_ENABLE_FORTRAN}"
 echo "LIBSZ_DIR           = ${LIBSZ_DIR}"
