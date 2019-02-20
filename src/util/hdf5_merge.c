@@ -32,12 +32,12 @@ CCTK_FILEVERSION(CactusExternal_HDF5_util_hdf5_merge_c)
    in case of an error */
 #define CHECK_ERROR(hdf5_call)                                                 \
   do {                                                                         \
-    int _error_code = hdf5_call;                                               \
+    hid_t _error_code = hdf5_call;                                             \
                                                                                \
     if (_error_code < 0) {                                                     \
       fprintf(stderr, "WARNING: line %d: HDF5 call '%s' returned "             \
                       "error code %d\n",                                       \
-              __LINE__, #hdf5_call, _error_code);                              \
+              __LINE__, #hdf5_call, (int)_error_code);                         \
       nerrors++;                                                               \
     }                                                                          \
   } while (0)
