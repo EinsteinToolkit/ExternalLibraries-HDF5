@@ -22,13 +22,21 @@ if [ -n "${HDF5}" ]; then
     exit 1
 fi
 
-# Take care of requests to build the library in any case
-HDF5_DIR_INPUT=$HDF5_DIR
-if [ "$(echo "${HDF5_DIR}" | tr '[a-z]' '[A-Z]')" = 'BUILD' ]; then
-    HDF5_BUILD=1
-    HDF5_DIR=
-else
-    HDF5_BUILD=
+# decode user provided HDF5_DIR option
+if [ -z "${HDF5_DIR}" ]; then
+  HDF5_BUILD=1
+  HDF5_SEARCH=1
+elif [ "$(echo "${HDF5_DIR}" | tr '[a-z]' '[A-Z]')" = 'BUILD' ]; then
+  unset HDF5_DIR
+  HDF5_BUILD=1
+  HDF5_SEARCH=
+elif [ "$(echo "${HDF5_DIR}" | tr '[a-z]' '[A-Z]')" = 'NO_BUILD' ]; then
+  unset HDF5_DIR
+  HDF5_BUILD=
+  HDF5_SEARCH=1
+else # HDF5_DIR is given but is is not NO_BUILD, search, but search only in it
+  HDF5_BUILD=
+  HDF5_SEARCH=1
 fi
 
 ################################################################################
@@ -56,70 +64,80 @@ fi
 HDF5_REQ_LIBS="${HDF5_CXX_LIBS} ${HDF5_FORTRAN_LIBS} ${HDF5_C_LIBS}"
 
 # Try to find the library if build isn't explicitly requested
-if [ -z "${HDF5_BUILD}" -a -z "${HDF5_INC_DIRS}" -a -z "${HDF5_LIB_DIRS}" -a -z "${HDF5_LIBS}" ]; then
-    find_lib HDF5 hdf5 1 1.0 "$HDF5_REQ_LIBS" "hdf5.h" "$HDF5_DIR"
+HDF5_FOUND=
+if [ -n "${HDF5_SEARCH}" ]; then
+    if [ -z "${HDF5_INC_DIRS}" -a -z "${HDF5_LIB_DIRS}" -a -z "${HDF5_LIBS}" ]; then
+        find_lib HDF5 hdf5 1 1.0 "$HDF5_REQ_LIBS" "hdf5.h" "$HDF5_DIR"
 
-    # Sadly, pkg-config for HDF5 is good for paths, but bad for the list of
-    # available (and necessary) library names, so we have to fix things
-    if [ -n "$PKG_CONFIG_SUCCESS" ]; then
-        HDF5_LIBS="hdf5_hl $HDF5_LIBS"
-        if ! find_libs "$HDF5_LIB_DIRS" "hdf5_hl"; then
-            echo 'BEGIN ERROR'
-            echo 'Detected problem with HDF5 libary at'
-            echo "          $HDF5_DIR ($HDF5_LIB_DIRS)"
-            echo 'Library hdf5_hl not found.'
-            echo 'END ERROR'
-            exit 1
-        fi
-        if [ "${HDF5_ENABLE_CXX:=no}" = 'yes' ]; then
-            HDF5_LIBS="hdf5_hl_cpp hdf5_cpp $HDF5_LIBS"
-            if ! find_libs "$HDF5_LIB_DIRS" "hdf5_hl_cpp hdf5_cpp"; then
-                echo 'BEGIN ERROR'
-                echo 'HDF5 Installation found at '
-                echo "       $HDF5_DIR ($HDF5_LIB_DIRS)"
-                echo '     does not provide requested C++ support. Either specify the '
-                echo '     location of a different HDF5 installation, or do not '
-                echo '     require the HDF5 C++ interface if you do not need it '
-                echo '     (set HDF5_ENABLE_CXX to "no").'
-                echo 'END ERROR'
-                exit 1
-            fi
-        fi
-        if [ "${HDF5_ENABLE_FORTRAN:=yes}" = 'yes' ]; then
-            HDF5_LIBS="hdf5hl_fortran hdf5_fortran $HDF5_LIBS"
-            if ! find_libs "$HDF5_LIB_DIRS" "hdf5hl_fortran hdf5_fortran"; then
-                echo 'BEGIN ERROR'
-                echo 'HDF5 Installation found at '
-                echo "       $HDF5_DIR ($HDF5_LIB_DIRS)"
-                echo '     does not provide requested Fortran support. Either specify '
-                echo '     location of a different HDF5 installation, or do not '
-                echo '     require the HDF5 Fortran interface if you do not need it '
-                echo '     (set HDF5_ENABLE_FORTRAN to "no").'
-                echo 'END ERROR'
-                exit 1
-            fi
-        fi
-    fi
-fi
-
-THORN=HDF5
+        if [ -n "${HDF5_DIR}" ]; then
+            # Sadly, pkg-config for HDF5 is good for paths, but bad for the list of
+            # available (and necessary) library names, so we have to fix things
+            if [ -n "$PKG_CONFIG_SUCCESS" ]; then
+                HDF5_LIBS="hdf5_hl $HDF5_LIBS"
+                if ! find_libs "$HDF5_LIB_DIRS" "hdf5_hl"; then
+                    echo 'BEGIN ERROR'
+                    echo 'Detected problem with HDF5 libary at'
+                    echo "          $HDF5_DIR ($HDF5_LIB_DIRS)"
+                    echo 'Library hdf5_hl not found.'
+                    echo 'END ERROR'
+                    exit 1
+                fi
+                if [ "${HDF5_ENABLE_CXX:=no}" = 'yes' ]; then
+                    HDF5_LIBS="hdf5_hl_cpp hdf5_cpp $HDF5_LIBS"
+                    if ! find_libs "$HDF5_LIB_DIRS" "hdf5_hl_cpp hdf5_cpp"; then
+                        echo 'BEGIN ERROR'
+                        echo 'HDF5 Installation found at '
+                        echo "       $HDF5_DIR ($HDF5_LIB_DIRS)"
+                        echo '     does not provide requested C++ support. Either specify the '
+                        echo '     location of a different HDF5 installation, or do not '
+                        echo '     require the HDF5 C++ interface if you do not need it '
+                        echo '     (set HDF5_ENABLE_CXX to "no").'
+                        echo 'END ERROR'
+                        exit 1
+                    fi
+                fi
+                if [ "${HDF5_ENABLE_FORTRAN:=yes}" = 'yes' ]; then
+                    HDF5_LIBS="hdf5hl_fortran hdf5_fortran $HDF5_LIBS"
+                    if ! find_libs "$HDF5_LIB_DIRS" "hdf5hl_fortran hdf5_fortran"; then
+                        echo 'BEGIN ERROR'
+                        echo 'HDF5 Installation found at '
+                        echo "       $HDF5_DIR ($HDF5_LIB_DIRS)"
+                        echo '     does not provide requested Fortran support. Either specify '
+                        echo '     location of a different HDF5 installation, or do not '
+                        echo '     require the HDF5 Fortran interface if you do not need it '
+                        echo '     (set HDF5_ENABLE_FORTRAN to "no").'
+                        echo 'END ERROR'
+                        exit 1
+                    fi
+                fi
+            fi # PKG_CONFIG_SUCCESS
+        fi # HDF5_DIR
+        HDF5_FOUND=1
+    fi # if [ -z
+fi # -n HDF5_SEARCH
 
 # configure library if build was requested or is needed (no usable
 # library found)
-if [ -n "$HDF5_BUILD" -o -z "${HDF5_DIR}" ]; then
+if [ -n "${HDF5_FOUND}" ]; then
+    HDF5_BUILD=
+    DONE_FILE=${SCRATCH_BUILD}/done/HDF5
+    if [ ! -e ${DONE_FILE} ]; then
+        mkdir -p ${SCRATCH_BUILD}/done
+        date > ${DONE_FILE}
+    fi
+elif [ -n "$HDF5_BUILD" ]; then
     echo "BEGIN MESSAGE"
     echo "Using bundled HDF5..."
     echo "END MESSAGE"
-    HDF5_BUILD=1
 
     check_tools "tar patch"
     
     # Set locations
     NAME=hdf5-1.8.17
     SRCDIR="$(dirname $0)"
-    BUILD_DIR=${SCRATCH_BUILD}/build/${THORN}
+    BUILD_DIR=${SCRATCH_BUILD}/build/HDF5
     if [ -z "${HDF5_INSTALL_DIR}" ]; then
-        INSTALL_DIR=${SCRATCH_BUILD}/external/${THORN}
+        INSTALL_DIR=${SCRATCH_BUILD}/external/HDF5
     else
         echo "BEGIN MESSAGE"
         echo "Installing HDF5 into ${HDF5_INSTALL_DIR}"
@@ -132,40 +150,26 @@ if [ -n "$HDF5_BUILD" -o -z "${HDF5_DIR}" ]; then
     HDF5_LIB_DIRS="${HDF5_DIR}/lib"
     HDF5_LIBS="${HDF5_CXX_LIBS} ${HDF5_FORTRAN_LIBS} ${HDF5_C_LIBS}"
 else
-    DONE_FILE=${SCRATCH_BUILD}/done/${THORN}
-    if [ ! -e ${DONE_FILE} ]; then
-        mkdir ${SCRATCH_BUILD}/done 2> /dev/null || true
-        date > ${DONE_FILE}
-    fi
-fi
-
-if [ -n "$HDF5_DIR" ]; then
-    : ${HDF5_RAW_LIB_DIRS:="$HDF5_LIB_DIRS"}
-    # Fortran modules may be located in the lib directory
-    HDF5_INC_DIRS="$HDF5_RAW_LIB_DIRS $HDF5_INC_DIRS"
-    # We need the un-scrubbed inc dirs to look for a header file below.
-    : ${HDF5_RAW_INC_DIRS:="$HDF5_INC_DIRS"}
-else
     echo 'BEGIN ERROR'
     echo 'ERROR in HDF5 configuration: Could neither find nor build library.'
     echo 'END ERROR'
     exit 1
 fi
 
+: ${HDF5_RAW_LIB_DIRS:="$HDF5_LIB_DIRS"}
+# Fortran modules may be located in the lib directory
+HDF5_INC_DIRS="$HDF5_RAW_LIB_DIRS $HDF5_INC_DIRS"
+# We need the un-scrubbed inc dirs to look for a header file below.
+: ${HDF5_RAW_INC_DIRS:="$HDF5_INC_DIRS"}
+
 ################################################################################
 # Check for additional libraries
 ################################################################################
 
 
-# Check whether we are running on Windows
-if perl -we 'exit (`uname` =~ /^CYGWIN/)'; then
-    is_windows=0
-else
-    is_windows=1
-fi
-
 # check installed library, assume that everything is fine if we build
-if [ -z "$HDF5_BUILD" -a -n "${HDF5_DIR}" ]; then
+# TODO: only do this is information was not provided by pkg-config
+if [ -n "${HDF5_FOUND}" ]; then
   # find public include file
   H5PUBCONFFILES="H5pubconf.h H5pubconf-64.h H5pubconf-32.h"
   for dir in $HDF5_RAW_INC_DIRS; do
