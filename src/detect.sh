@@ -224,8 +224,8 @@ if [ -n "${HDF5_FOUND}" ]; then
   fi
 fi
 
-# Add the math library which might not be linked by default
-if [ $is_windows -eq 0 ]; then
+# On Windows add the math library which might not be linked by default
+if perl -we 'exit ($^O eq "Cygwin" ? 0 : 1)'; then
     HDF5_LIBS="$HDF5_LIBS m"
 fi
 
