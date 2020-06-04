@@ -14,7 +14,7 @@ set -e                          # Abort on errors
 
 # Set locations
 THORN=HDF5
-NAME=hdf5-1.10.5
+NAME=hdf5-1.12.0
 SRCDIR="$(dirname $0)"
 BUILD_DIR=${SCRATCH_BUILD}/build/${THORN}
 if [ -z "${HDF5_INSTALL_DIR}" ]; then
