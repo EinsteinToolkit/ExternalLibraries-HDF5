@@ -1,0 +1,159 @@
+Only in h5check_2_0.new/: Makefile
+Only in h5check_2_0.new/: config.status
+Only in h5check_2_0.new/src: .deps
+Only in h5check_2_0.new/src: .h5_check.h.swp
+Only in h5check_2_0.new/src: Makefile
+diff -urw h5check_2_0.orig/src/h5_check.h h5check_2_0.new/src/h5_check.h
+--- h5check_2_0.orig/src/h5_check.h	2010-04-21 15:03:35.000000000 -0500
++++ h5check_2_0.new/src/h5_check.h	2020-06-17 20:24:32.890211337 -0500
+@@ -2123,14 +2123,18 @@
+ char     	*FD_get_fname(driver_t *, ck_addr_t);
+ 
+ /* command line option */
++extern
+ int     	g_verbose_num;
++extern
+ int		g_format_num;
++extern
+ ck_addr_t 	g_obj_addr;
+ void            print_version(const char *);
+ void            usage(char *);
+ void            leave(int);
+ 
+ /* for handling hard links */
++extern
+ table_t         *obj_table;
+ int             table_init(table_t **);
+ 
+@@ -2139,19 +2143,31 @@
+ ck_err_t        check_obj_header(driver_t *, ck_addr_t, OBJ_t **);
+ 
+ /* entering via h5checker_obj() API */
++extern
+ int		g_obj_api;
++extern
+ int		g_obj_api_err;
+ void            process_err(ck_errmsg_t *);
+ 
++extern
+ const obj_class_t *const message_type_g[MSG_TYPES];
++extern
+ const B2_class_t HF_BT2_INDIR[1];
++extern
+ const B2_class_t HF_BT2_FILT_INDIR[1];
++extern
+ const B2_class_t HF_BT2_DIR[1];
++extern
+ const B2_class_t HF_BT2_FILT_DIR[1];
++extern
+ const B2_class_t G_BT2_CORDER[1];
++extern
+ const B2_class_t G_BT2_NAME[1];
++extern
+ const B2_class_t SM_INDEX[1];
++extern
+ const B2_class_t A_BT2_NAME[1];
++extern
+ const B2_class_t A_BT2_CORDER[1];
+ 
+ /* Define the check indexed message (group & attribute) callback function from check_btree2() */
+Only in h5check_2_0.new/src: h5_check.h~
+diff -urw h5check_2_0.orig/src/h5_error.h h5check_2_0.new/src/h5_error.h
+--- h5check_2_0.orig/src/h5_error.h	2010-04-21 15:03:35.000000000 -0500
++++ h5check_2_0.new/src/h5_error.h	2020-06-17 20:29:01.583988003 -0500
+@@ -89,6 +89,7 @@
+ } ERR_t;
+ 
+ /* the current error stack */
++extern
+ ERR_t	ERR_stack_g[1];
+ 
+ #define	ERR_get_my_stack()	(ERR_stack_g+0)
+Only in h5check_2_0.new/src: h5_error.h~
+diff -urw h5check_2_0.orig/src/h5_pline.h h5check_2_0.new/src/h5_pline.h
+--- h5check_2_0.orig/src/h5_pline.h	2010-04-21 15:03:35.000000000 -0500
++++ h5check_2_0.new/src/h5_pline.h	2020-06-17 20:35:01.343719833 -0500
+@@ -29,9 +29,11 @@
+ } Z_cb_t;
+ 
+ /* Deflate filter */
++extern
+ Z_class_t Z_DEFLATE[1];
+ 
+ /* Shuffle filter */
++extern
+ Z_class_t Z_SHUFFLE[1];
+ 
+ #define Z_SHUFFLE_USER_NPARMS    0       /* Number of parameters that users can set */
+@@ -40,11 +42,13 @@
+ 
+ 
+ /* Fletcher32 filter */
++extern
+ Z_class_t Z_FLETCHER32[1];
+ 
+ #define FLETCHER_LEN       4
+ 
+ /* szip filter */
++extern
+ Z_class_t Z_SZIP[1];
+ 
+ #define Z_SZIP_PARM_MASK      0       /* "User" parameter for option mask */
+@@ -57,6 +61,7 @@
+ /* 
+  * nbit filter 
+  */
++extern
+ Z_class_t Z_NBIT[1];
+ 
+ #define Z_NBIT_ATOMIC          1     /* Atomic datatype class: integer/floating-point */
+@@ -71,6 +76,7 @@
+ /* 
+  * scaleoffset filter 
+  */
++extern
+ Z_class_t Z_SCALEOFFSET[1];
+ 
+ typedef enum Z_SO_scale_type_t {
+Only in h5check_2_0.new/src: h5_pline.h~
+Only in h5check_2_0.new/src: h5checker.o
+Only in h5check_2_0.new/src: h5checkerV2_0.o
+Only in h5check_2_0.new/src: h5checker_api.o
+Only in h5check_2_0.new/src: h5chk_config.h
+Only in h5check_2_0.new/src: h5error.o
+Only in h5check_2_0.new/src: h5pline.o
+Only in h5check_2_0.new/src: libh5check.a
+Only in h5check_2_0.new/src: stamp-h1
+Only in h5check_2_0.new/test: .deps
+Only in h5check_2_0.new/test: Makefile
+Only in h5check_2_0.new/test: testgen
+Only in h5check_2_0.new/test: testgen.o
+Only in h5check_2_0.new/tool: .deps
+Only in h5check_2_0.new/tool: Makefile
+Only in h5check_2_0.new/tool: h5check
+diff -urw h5check_2_0.orig/tool/h5checker_main.c h5check_2_0.new/tool/h5checker_main.c
+--- h5check_2_0.orig/tool/h5checker_main.c	2010-04-21 15:03:35.000000000 -0500
++++ h5check_2_0.new/tool/h5checker_main.c	2020-06-17 20:36:37.105777490 -0500
+@@ -12,6 +12,20 @@
+ #include "h5_error.h"
+ #include "h5_pline.h"
+ 
++/* command line option */
++int     	g_verbose_num;
++int		g_format_num;
++ck_addr_t 	g_obj_addr;
++
++/* for handling hard links */
++table_t         *obj_table;
++
++/* entering via h5checker_obj() API */
++int		g_obj_api;
++int		g_obj_api_err;
++
++/* the current error stack */
++ERR_t   ERR_stack_g[1];
+ 
+ int main(int argc, char **argv)
+ {
+Only in h5check_2_0.new/tool: h5checker_main.c~
+Only in h5check_2_0.new/tool: h5checker_main.o

@@ -87,6 +87,24 @@ echo "HDF5: Unpacking checker archive..."
 pushd ${BUILD_DIR}
 ${TAR?} xzf ${SRCDIR}/../dist/h5check_2_0.tar.gz
 
+echo "HDF5: Applying checker patches..."
+pushd h5check_2_0
+${PATCH?} -p1 < ${SRCDIR}/../dist/common.patch
+# Some (ancient but still used) versions of patch don't support the
+# patch format used here but also don't report an error using the exit
+# code. So we use this patch to test for this
+${PATCH?} -p1 < ${SRCDIR}/../dist/patchtest.patch
+if [ ! -e .patch_tmp ]; then
+    echo 'BEGIN ERROR'
+    echo 'The version of patch is too old to understand this patch format.'
+    echo 'Please set the PATCH environment variable to a more recent '
+    echo 'version of the patch command.'
+    echo 'END ERROR'
+    exit 1
+fi
+rm -f .patch_tmp
+popd
+
 echo "HDF5: Configuring checker..."
 cd h5check_2_0
 # Point the checker to the just-installed library
