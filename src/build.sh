@@ -73,7 +73,8 @@ if [[ -n ${FC} ]]; then
 else
     HDF5_ENABLE_FORTRAN=no
 fi
-./configure --prefix=${HDF5_DIR} --with-zlib=${ZLIB_DIR} --enable-cxx=${HDF5_ENABLE_CXX} --enable-fortran=${HDF5_ENABLE_FORTRAN} --enable-fortran2003=${HDF5_ENABLE_FORTRAN} --disable-shared --enable-static-exec
+# disable HDF5 tests since they create ~2GB of test files
+./configure --prefix=${HDF5_DIR} --with-zlib=${ZLIB_DIR} --enable-cxx=${HDF5_ENABLE_CXX} --enable-fortran=${HDF5_ENABLE_FORTRAN} --enable-fortran2003=${HDF5_ENABLE_FORTRAN} --enable-tests=no --disable-shared --enable-static-exec
 
 echo "HDF5: Building..."
 ${MAKE}
