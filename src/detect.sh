@@ -65,7 +65,7 @@ if [ -z "${HDF5_BUILD}" -a -z "${HDF5_INC_DIRS}" -a -z "${HDF5_LIB_DIRS}" -a -z 
 
 		HDF5_OUTPUT=$(mktemp find_lib_output.$$.XXXXX)
                 set +e
-                find_lib HDF5 hdf5 1 1.0 "$HDF5_REQ_LIBS" "hdf5.h" "$HDF5_DIR" >$HDF5_OUTPUT
+                find_lib HDF5 hdf5 1 1.8 "$HDF5_REQ_LIBS" "hdf5.h" "$HDF5_DIR" >$HDF5_OUTPUT
                 HDF5_ERROR=$?
                 set -e
                 if [ $HDF5_ERROR -ne 0 ]; then
