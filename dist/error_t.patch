@@ -1,0 +1,29 @@
+diff -ur h5check_2_0.orig/src/h5_error.h h5check_2_0/src/h5_error.h
+--- h5check_2_0.orig/src/h5_error.h	2010-04-21 15:03:35.000000000 -0500
++++ h5check_2_0/src/h5_error.h	2021-01-22 20:32:25.039155755 -0600
+@@ -69,14 +69,14 @@
+ } err_rep_t;
+ 
+ /* Information about an error */
+-typedef struct  error_t {
++typedef struct  h5_error_t {
+         primary_err_t   prim_err;	/* Primary Format Level where error is found */
+         secondary_err_t sec_err;	/* Secondary Format Level where error is found */
+         const char      *desc;		/* Detail description of error */
+     	ck_addr_t	logical_addr;  	/* logical address where error occurs */
+ 	const char	*fname;		/* file name where errors occur */
+ 	err_rep_t	err_info;	/* for reporting wrong/correct version info */
+-} error_t;
++} h5_error_t;
+ 
+ #define	REPORTED	1
+ #define	NOT_REP		0
+@@ -85,7 +85,7 @@
+ /* An error stack */
+ typedef struct ERR_t {
+     int nused;                  	/* num slots currently used in stack  */
+-    error_t slot[H5E_NSLOTS];       /* array of error records */
++    h5_error_t slot[H5E_NSLOTS];       /* array of error records */
+ } ERR_t;
+ 
+ /* the current error stack */

@@ -90,6 +90,7 @@ ${TAR?} xzf ${SRCDIR}/../dist/h5check_2_0.tar.gz
 echo "HDF5: Applying checker patches..."
 pushd h5check_2_0
 ${PATCH?} -p1 < ${SRCDIR}/../dist/common.patch
+${PATCH?} -p1 < ${SRCDIR}/../dist/error_t.patch
 # Some (ancient but still used) versions of patch don't support the
 # patch format used here but also don't report an error using the exit
 # code. So we use this patch to test for this
