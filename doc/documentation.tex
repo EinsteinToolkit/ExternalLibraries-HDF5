@@ -9,8 +9,8 @@
 \begin{document}
 
 \title{\tt ExternalLibraries/HDF5}
-\author{Yaakoub Y El-Khamra, Thomas Radke}
-\date{$ $Date: 2007/11/12 16:24:16 $ $}
+\author{Yaakoub Y El-Khamra, Thomas Radke,Federico Cipolletta}
+\date{2020-07-01}
 
 \maketitle
 
@@ -56,6 +56,29 @@ to get a short usage info.
 If any of these utility programs is called without arguments it will print
 a usage message.
 \end{abstract}
+
+\section{Using This Thorn}
+
+Refer to the Cactus UserGuide, Sec. B2.2, in order to know how this thorn can be used in a compiled configuration and how to possibly linking another specific version, already installed steparately.
+
+\subsection*{Note on possible ExternalLibraries' location stripping}
+\label{stripping}
+
+Each thorn contained in \texttt{Cactus/arrangements/ExternalLibraries} will automatically adopt the library version contained in the \texttt{Cactus/arrangements/<library>/dist} folder. In particular, the tarball in \texttt{Cactus/arrangements/<library>/dist} is only used if either \texttt{THORN\_DIR} is set to \texttt{BUILD} or is left empty and no precompiled copy of the library is found. If another location is specified via the \texttt{THORN\_DIR} variable in the \texttt{<machine>.cfg} file at compilation, then the \texttt{Cactus/lib/sbin/strip-incdirs.sh} script will automatically strip away (for safety reasons) the locations:
+\begin{Lentry}
+\item [\texttt{/include}]
+\item [\texttt{/usr/include}]
+\item [\texttt{/usr/local/include}]
+\end{Lentry}
+from \texttt{THORN\_INC\_DIRS} which default to \texttt{THORN\_DIR/include}. Therefore, if there is any need for using one already installed version of one external library, the aforementioned location should be avoided (e.g. indicating \texttt{/home} as the \texttt{THORN\_DIR} will work with no problems if the required library is installed there) or should be carefully checked, in order to avoid unwanted stripping. The same stripping happens to \texttt{THORN\_LIB\_DIRS} in \texttt{lib/sbin/strip-libdirs.sh} with a larger list of directories:
+\begin{Lentry}
+\item [\texttt{/lib}]
+\item [\texttt{/usr/lib}]
+\item [\texttt{/usr/local/lib}]
+\item [\texttt{/lib64}]
+\item [\texttt{/usr/lib64}]
+\item [\texttt{/usr/local/lib64}] 
+\end{Lentry}
 
 % Do not delete next line
 % END CACTUS THORNGUIDE
