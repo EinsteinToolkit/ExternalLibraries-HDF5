@@ -44,7 +44,8 @@ if [ "${HDF5_ENABLE_CXX:=no}" = 'yes' ]; then
 fi
 if [ "${HDF5_ENABLE_FORTRAN:=yes}" = 'yes' ]; then
     if [ "${F90}" != "none" ]; then
-        HDF5_FORTRAN_LIBS='hdf5hl_fortran hdf5_fortran'
+        # naming of high-level libs is not consistent so we try different options
+        HDF5_FORTRAN_LIBS=('hdf5hl_fortran hdf5_fortran' 'hdf5_hl_fortran hdf5_fortran')
         HDF5_REQ="$HDF5_REQ Fortran"
     fi
 fi
@@ -53,52 +54,74 @@ if [ -n "$HDF5_REQ" ]; then
     echo "Additional requested language support: $HDF5_REQ"
     echo "END MESSAGE"
 fi
-HDF5_REQ_LIBS="${HDF5_CXX_LIBS} ${HDF5_FORTRAN_LIBS} ${HDF5_C_LIBS}"
 
 # Try to find the library if build isn't explicitly requested
 if [ -z "${HDF5_BUILD}" -a -z "${HDF5_INC_DIRS}" -a -z "${HDF5_LIB_DIRS}" -a -z "${HDF5_LIBS}" ]; then
-    find_lib HDF5 hdf5 1 1.0 "$HDF5_REQ_LIBS" "hdf5.h" "$HDF5_DIR"
-
-    # Sadly, pkg-config for HDF5 is good for paths, but bad for the list of
-    # available (and necessary) library names, so we have to fix things
-    if [ -n "$PKG_CONFIG_SUCCESS" ]; then
-        HDF5_LIBS="hdf5_hl $HDF5_LIBS"
-        if ! find_libs "$HDF5_LIB_DIRS" "hdf5_hl"; then
-            echo 'BEGIN ERROR'
-            echo 'Detected problem with HDF5 libary at'
-            echo "          $HDF5_DIR ($HDF5_LIB_DIRS)"
-            echo 'Library hdf5_hl not found.'
-            echo 'END ERROR'
-            exit 1
-        fi
-        if [ "${HDF5_ENABLE_CXX:=no}" = 'yes' ]; then
-            HDF5_LIBS="hdf5_hl_cpp hdf5_cpp $HDF5_LIBS"
-            if ! find_libs "$HDF5_LIB_DIRS" "hdf5_hl_cpp hdf5_cpp"; then
-                echo 'BEGIN ERROR'
-                echo 'HDF5 Installation found at '
-                echo "       $HDF5_DIR ($HDF5_LIB_DIRS)"
-                echo '     does not provide requested C++ support. Either specify the '
-                echo '     location of a different HDF5 installation, or do not '
-                echo '     require the HDF5 C++ interface if you do not need it '
-                echo '     (set HDF5_ENABLE_CXX to "no").'
-                echo 'END ERROR'
-                exit 1
+    for clibs in "${HDF5_C_LIBS[@]}" ; do # HDF5_C_LIBS is never unset
+        for cxxlibs in "${HDF5_CXX_LIBS[@]-}" ; do
+            for fortranlibs in "${HDF5_FORTRAN_LIBS[@]-}" ; do
+                HDF5_REQ_MISSING=""
+                HDF5_REQ_LIBS="$clibs $cxxlibs $fortranlibs"
+                find_lib HDF5 hdf5 1 1.0 "$HDF5_REQ_LIBS" "hdf5.h" "$HDF5_DIR"
+            
+                # Sadly, pkg-config for HDF5 is good for paths, but bad for the list of
+                # available (and necessary) library names, so we have to fix things
+                if [ -n "$PKG_CONFIG_SUCCESS" ]; then
+                    HDF5_LIBS="$clibs $HDF5_LIBS"
+                    if ! find_libs "$HDF5_LIB_DIRS" "$clibs"; then
+                        HDF5_REQ_MISSING=$(
+                        echo 'Detected problem with HDF5 libary at'
+                        echo "          $HDF5_DIR ($HDF5_LIB_DIRS)"
+                        echo 'Library $clibs not found.'
+                        )
+                        continue
+                    fi
+                    if [ "${HDF5_ENABLE_CXX:=no}" = 'yes' ]; then
+                        HDF5_LIBS="$cxxlibs $HDF5_LIBS"
+                        if ! find_libs "$HDF5_LIB_DIRS" "$cxxlibs"; then
+                            HDF5_REQ_MISSING=$(
+                            echo 'HDF5 Installation found at '
+                            echo "       $HDF5_DIR ($HDF5_LIB_DIRS)"
+                            echo '     does not provide requested C++ support. Either specify the '
+                            echo '     location of a different HDF5 installation, or do not '
+                            echo '     require the HDF5 C++ interface if you do not need it '
+                            echo '     (set HDF5_ENABLE_CXX to "no").'
+                            )
+                            continue
+                        fi
+                    fi
+                    if [ "${HDF5_ENABLE_FORTRAN:=yes}" = 'yes' ]; then
+                        HDF5_LIBS="$fortranlibs $HDF5_LIBS"
+                        if ! find_libs "$HDF5_LIB_DIRS" "$fortranlibs"; then
+                            HDF5_REQ_MISSING=$(
+                            echo 'HDF5 Installation found at '
+                            echo "       $HDF5_DIR ($HDF5_LIB_DIRS)"
+                            echo '     does not provide requested Fortran support. Either specify '
+                            echo '     location of a different HDF5 installation, or do not '
+                            echo '     require the HDF5 Fortran interface if you do not need it '
+                            echo '     (set HDF5_ENABLE_FORTRAN to "no").'
+                            )
+                            continue
+                        fi
+                    fi
+                fi
+                if [ -n "$PKG_CONFIG_SUCCESS" ] && [ -z "$HDF5_REQ_MISSING" ]; then
+                    break
+                fi
+            done
+            if [ -n "$PKG_CONFIG_SUCCESS" ] && [ -z "$HDF5_REQ_MISSING" ]; then
+                break
             fi
+        done
+        if [ -n "$PKG_CONFIG_SUCCESS" ] && [ -z "$HDF5_REQ_MISSING" ]; then
+            break
         fi
-        if [ "${HDF5_ENABLE_FORTRAN:=yes}" = 'yes' ]; then
-            HDF5_LIBS="hdf5hl_fortran hdf5_fortran $HDF5_LIBS"
-            if ! find_libs "$HDF5_LIB_DIRS" "hdf5hl_fortran hdf5_fortran"; then
-                echo 'BEGIN ERROR'
-                echo 'HDF5 Installation found at '
-                echo "       $HDF5_DIR ($HDF5_LIB_DIRS)"
-                echo '     does not provide requested Fortran support. Either specify '
-                echo '     location of a different HDF5 installation, or do not '
-                echo '     require the HDF5 Fortran interface if you do not need it '
-                echo '     (set HDF5_ENABLE_FORTRAN to "no").'
-                echo 'END ERROR'
-                exit 1
-            fi
-        fi
+    done
+    if [ -n "$HDF5_REQ_MISSING" ]; then
+        echo 'BEGIN ERROR'
+        echo "$HDF5_REQ_MISSING"
+        echo 'END ERROR'
+        exit 1
     fi
 fi
 
