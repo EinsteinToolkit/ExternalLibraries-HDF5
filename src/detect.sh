@@ -123,6 +123,23 @@ if [ -z "${HDF5_BUILD}" -a -z "${HDF5_INC_DIRS}" -a -z "${HDF5_LIB_DIRS}" -a -z 
         echo 'END ERROR'
         exit 1
     fi
+    # the automated fallback has issues finding libsz on macports, supplement
+    # guessed information with h5cc info if available
+    if [ -z "${PKG_CONFIG_SUCCESS}" ] && ${HDF5_DIR}/bin/h5cc -show &>/dev/null; then
+        CMD=$(HDF5_CC=$CC HDF5_CLINKER=$LD h5cc -noshlib -show)
+        for word in ${CMD} ; do
+            if [ "${word:0:1}" = "-" ]; then # an option
+                if [ "${word:0:2}" = "-L" ]; then # -L option
+                    HDF5_LIB_DIRS="${HDF5_LIB_DIRS} ${word#-L}"
+                fi
+            else
+                file=${word##*/}
+                if [ "${file:0:3}" = "lib" ]; then # path to lib file
+                    HDF5_LIB_DIRS="${HDF5_LIB_DIRS} ${word%/*}"
+                fi
+           fi
+        done
+    fi
 fi
 
 THORN=HDF5
