@@ -29,6 +29,10 @@ DONE_FILE=${SCRATCH_BUILD}/done/${THORN}
 HDF5_DIR=${INSTALL_DIR}
 
 # Set up environment
+unset CPP
+unset LIBS
+unset RPATH
+
 if [[ ${F90} == none ]]; then
     echo 'BEGIN MESSAGE'
     echo 'No Fortran 90 compiler available. Building HDF5 library without Fortran support.'
@@ -39,14 +43,19 @@ else
     export FC="${F90}"
     export FCFLAGS="${F90FLAGS}"
 fi
-for dir in $SYS_INC_DIRS; do
+for dir in $ZLIB_INC_DIRS $SYS_INC_DIRS; do
     CPPFLAGS="$CPPFLAGS -I$dir"
+done
+for dir in $ZLIB_LIB_DIRS $LIBDIRS; do
+    LDFLAGS="$LDFLAGS ${LIBDIR_PREFIX}$dir ${RUNDIR_PREFIX}$dir"
+done
+# TODO: handle Cactus' LIBS
+for lib in $ZLIB_LIBS; do
+    LIBS="$LIBS ${LIBLINK_PREFIX}$lib"
 done
 export CPPFLAGS
 export LDFLAGS
-unset CPP
-unset LIBS
-unset RPATH
+export LIBS
 if echo '' ${ARFLAGS} | grep 64 > /dev/null 2>&1; then
     export OBJECT_MODE=64
 fi
@@ -74,7 +83,7 @@ else
     HDF5_ENABLE_FORTRAN=no
 fi
 # disable HDF5 tests since they create ~2GB of test files
-./configure --prefix=${HDF5_DIR} --with-zlib=${ZLIB_DIR} --enable-cxx=${HDF5_ENABLE_CXX} --enable-fortran=${HDF5_ENABLE_FORTRAN} --enable-fortran2003=${HDF5_ENABLE_FORTRAN} --enable-tests=no --disable-shared --enable-static-exec
+./configure --prefix=${HDF5_DIR} --with-zlib=${ZLIB_DIR} --enable-cxx=${HDF5_ENABLE_CXX} --enable-fortran=${HDF5_ENABLE_FORTRAN} --enable-fortran2003=${HDF5_ENABLE_FORTRAN} --enable-parallel=no --enable-tests=no --disable-shared --enable-static-exec
 
 echo "HDF5: Building..."
 ${MAKE}

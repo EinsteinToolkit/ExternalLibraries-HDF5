@@ -180,7 +180,7 @@ if [ -z "$HDF5_BUILD" -a -n "${HDF5_DIR}" ]; then
       echo 'BEGIN MESSAGE'
       echo 'WARNING in HDF5 configuration: '
       echo "None of $H5PUBCONFFILES found in $HDF5_RAW_INC_DIRS"
-      echo "Automatic detection of szip/zlib compression not possible"
+      echo "Automatic detection of szip compression not possible"
       echo 'END MESSAGE'
   else
 
@@ -193,17 +193,6 @@ if [ -z "$HDF5_BUILD" -a -n "${HDF5_DIR}" ]; then
       if [ $test_szlib -eq 0 ]; then
           HDF5_LIB_DIRS="$HDF5_LIB_DIRS $LIBSZ_DIR"
           HDF5_LIBS="$HDF5_LIBS sz"
-      fi
-
-      # Check whether we have to link with libz.a
-      if grep -qe '#define H5_HAVE_LIBZ 1' $H5PUBCONF 2> /dev/null; then
-          test_zlib=0
-      else
-          test_zlib=1
-      fi
-      if [ $test_zlib -eq 0 ]; then
-          HDF5_LIB_DIRS="$HDF5_LIB_DIRS $LIBZ_DIR"
-          HDF5_LIBS="$HDF5_LIBS z"
       fi
 
       # Check whether we have to link with MPI
@@ -237,7 +226,6 @@ echo "HDF5_BUILD          = ${HDF5_BUILD}"
 echo "HDF5_ENABLE_CXX     = ${HDF5_ENABLE_CXX}"
 echo "HDF5_ENABLE_FORTRAN = ${HDF5_ENABLE_FORTRAN}"
 echo "LIBSZ_DIR           = ${LIBSZ_DIR}"
-echo "LIBZ_DIR            = ${LIBZ_DIR}"
 echo "HDF5_INSTALL_DIR    = ${HDF5_INSTALL_DIR}"
 echo "END MAKE_DEFINITION"
 
