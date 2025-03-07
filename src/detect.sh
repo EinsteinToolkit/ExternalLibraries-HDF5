@@ -62,10 +62,19 @@ if [ -z "${HDF5_BUILD}" -a -z "${HDF5_INC_DIRS}" -a -z "${HDF5_LIB_DIRS}" -a -z 
             for fortranlibs in "${HDF5_FORTRAN_LIBS[@]-}" ; do
                 HDF5_REQ_MISSING=""
                 HDF5_REQ_LIBS="$clibs $cxxlibs $fortranlibs"
-                find_lib HDF5 hdf5 1 1.0 "$HDF5_REQ_LIBS" "hdf5.h" "$HDF5_DIR"
+
+		HDF5_OUTPUT=$(mktemp find_lib_output.$$.XXXXX)
+                set +e
+                find_lib HDF5 hdf5 1 1.0 "$HDF5_REQ_LIBS" "hdf5.h" "$HDF5_DIR" >$HDF5_OUTPUT
+                HDF5_ERROR=$?
+                set -e
+                if [ $HDF5_ERROR -ne 0 ]; then
+                    continue
+                fi
             
                 # Sadly, pkg-config for HDF5 is good for paths, but bad for the list of
                 # available (and necessary) library names, so we have to fix things
+                HDF5_REQ_MISSING=""
                 if [ -n "$PKG_CONFIG_SUCCESS" ]; then
                     HDF5_LIBS="$clibs $HDF5_LIBS"
                     if ! find_libs "$HDF5_LIB_DIRS" "$clibs"; then
@@ -105,23 +114,27 @@ if [ -z "${HDF5_BUILD}" -a -z "${HDF5_INC_DIRS}" -a -z "${HDF5_LIB_DIRS}" -a -z 
                         fi
                     fi
                 fi
-                if [ -n "$PKG_CONFIG_SUCCESS" ] && [ -z "$HDF5_REQ_MISSING" ]; then
+                if [ -z "$HDF5_REQ_MISSING" ]; then
                     break
                 fi
             done
-            if [ -n "$PKG_CONFIG_SUCCESS" ] && [ -z "$HDF5_REQ_MISSING" ]; then
+            if [ -z "$HDF5_REQ_MISSING" ]; then
                 break
             fi
         done
-        if [ -n "$PKG_CONFIG_SUCCESS" ] && [ -z "$HDF5_REQ_MISSING" ]; then
+        if [ -z "$HDF5_REQ_MISSING" ]; then
             break
         fi
     done
+    cat "$HDF5_OUTPUT"
     if [ -n "$HDF5_REQ_MISSING" ]; then
         echo 'BEGIN ERROR'
         echo "$HDF5_REQ_MISSING"
         echo 'END ERROR'
         exit 1
+    fi
+    if [ $HDF5_ERROR -ne 0 ]; then
+       exit $HDF5_ERROR
     fi
     # the automated fallback has issues finding libsz on macports, supplement
     # guessed information with h5cc info if available
