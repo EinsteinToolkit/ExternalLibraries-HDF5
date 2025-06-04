@@ -76,18 +76,19 @@ if [ -z "${HDF5_BUILD}" -a -z "${HDF5_INC_DIRS}" -a -z "${HDF5_LIB_DIRS}" -a -z 
                 # available (and necessary) library names, so we have to fix things
                 HDF5_REQ_MISSING=""
                 if [ -n "$PKG_CONFIG_SUCCESS" ]; then
+                    LIB_DIRS=$(pkg-config --libs-only-L --keep-system-libs --static hdf5 | perl -pe 's/(^| )+-L/\1/g')
                     HDF5_LIBS="$clibs $HDF5_LIBS"
-                    if ! find_libs "$HDF5_LIB_DIRS" "$clibs"; then
+                    if ! find_libs "$LIB_DIRS" "$clibs"; then
                         HDF5_REQ_MISSING=$(
                         echo 'Detected problem with HDF5 libary at'
                         echo "          $HDF5_DIR ($HDF5_LIB_DIRS)"
-                        echo 'Library $clibs not found.'
+                        echo "Library(s) $clibs not found."
                         )
                         continue
                     fi
                     if [ "${HDF5_ENABLE_CXX:=no}" = 'yes' ]; then
                         HDF5_LIBS="$cxxlibs $HDF5_LIBS"
-                        if ! find_libs "$HDF5_LIB_DIRS" "$cxxlibs"; then
+                        if ! find_libs "$LIB_DIRS" "$cxxlibs"; then
                             HDF5_REQ_MISSING=$(
                             echo 'HDF5 Installation found at '
                             echo "       $HDF5_DIR ($HDF5_LIB_DIRS)"
@@ -95,13 +96,14 @@ if [ -z "${HDF5_BUILD}" -a -z "${HDF5_INC_DIRS}" -a -z "${HDF5_LIB_DIRS}" -a -z 
                             echo '     location of a different HDF5 installation, or do not '
                             echo '     require the HDF5 C++ interface if you do not need it '
                             echo '     (set HDF5_ENABLE_CXX to "no").'
+                            echo "Library(s) $cxxlibs not found."
                             )
                             continue
                         fi
                     fi
                     if [ "${HDF5_ENABLE_FORTRAN:=yes}" = 'yes' ]; then
                         HDF5_LIBS="$fortranlibs $HDF5_LIBS"
-                        if ! find_libs "$HDF5_LIB_DIRS" "$fortranlibs"; then
+                        if ! find_libs "$LIB_DIRS" "$fortranlibs"; then
                             HDF5_REQ_MISSING=$(
                             echo 'HDF5 Installation found at '
                             echo "       $HDF5_DIR ($HDF5_LIB_DIRS)"
@@ -109,6 +111,7 @@ if [ -z "${HDF5_BUILD}" -a -z "${HDF5_INC_DIRS}" -a -z "${HDF5_LIB_DIRS}" -a -z 
                             echo '     location of a different HDF5 installation, or do not '
                             echo '     require the HDF5 Fortran interface if you do not need it '
                             echo '     (set HDF5_ENABLE_FORTRAN to "no").'
+                            echo "Library(s) $fortranlibs not found."
                             )
                             continue
                         fi
