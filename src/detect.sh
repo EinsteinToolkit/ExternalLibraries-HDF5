@@ -145,18 +145,20 @@ if [ -z "${HDF5_BUILD}" -a -z "${HDF5_INC_DIRS}" -a -z "${HDF5_LIB_DIRS}" -a -z 
         # macOS h5cc does not take -noshlibs but wants pkg-config options, Linux wants
         # compiler options
         CMD=$(HDF5_CC=$CC HDF5_CLINKER=$LD HDF5_USE_SHLIB=no ${HDF5_DIR}/bin/h5cc -show)
+        LIB_DIRS=""
         for word in ${CMD} ; do
             if [ "${word:0:1}" = "-" ]; then # an option
                 if [ "${word:0:2}" = "-L" ]; then # -L option
-                    HDF5_LIB_DIRS="${HDF5_LIB_DIRS} ${word#-L}"
+                    LIB_DIRS="${LIB_DIRS} ${word#-L}"
                 fi
             else
                 file=${word##*/}
                 if [ "${file:0:3}" = "lib" ]; then # path to lib file
-                    HDF5_LIB_DIRS="${HDF5_LIB_DIRS} ${word%/*}"
+                    LIB_DIRS="${LIB_DIRS} ${word%/*}"
                 fi
            fi
         done
+        HDF5_LIB_DIRS="${HDF5_LIB_DIRS} $($CCTK_HOME/lib/sbin/strip-libdirs.sh ${LIB_DIRS})"
     fi
 fi
 
