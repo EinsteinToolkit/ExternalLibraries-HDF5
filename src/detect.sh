@@ -76,7 +76,7 @@ if [ -z "${HDF5_BUILD}" -a -z "${HDF5_INC_DIRS}" -a -z "${HDF5_LIB_DIRS}" -a -z 
                 # available (and necessary) library names, so we have to fix things
                 HDF5_REQ_MISSING=""
                 if [ -n "$PKG_CONFIG_SUCCESS" ]; then
-                    LIB_DIRS=$(pkg-config --libs-only-L --keep-system-libs --static hdf5 | perl -pe 's/(^| )+-L/\1/g')
+                    LIB_DIRS=$(PKG_CONFIG_ALLOW_SYSTEM_LIBS=1 pkg-config --libs-only-L --static hdf5 | perl -pe 's/(^| )+-L/\1/g')
                     HDF5_LIBS="$clibs $HDF5_LIBS"
                     if ! find_libs "$LIB_DIRS" "$clibs"; then
                         HDF5_REQ_MISSING=$(
