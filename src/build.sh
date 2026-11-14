@@ -14,7 +14,7 @@ set -e                          # Abort on errors
 
 # Set locations
 THORN=HDF5
-NAME=hdf5-1.12.0
+NAME=hdf5-1.12.1
 SRCDIR="$(dirname $0)"
 BUILD_DIR=${SCRATCH_BUILD}/build/${THORN}
 if [ -z "${HDF5_INSTALL_DIR}" ]; then
@@ -74,7 +74,8 @@ else
     HDF5_ENABLE_FORTRAN=no
 fi
 # disable HDF5 tests since they create ~2GB of test files
-./configure --prefix=${HDF5_DIR} --with-zlib=${ZLIB_DIR} --enable-cxx=${HDF5_ENABLE_CXX} --enable-fortran=${HDF5_ENABLE_FORTRAN} --enable-fortran2003=${HDF5_ENABLE_FORTRAN} --enable-tests=no --disable-shared --enable-static-exec
+# --with-pic: this static archive is linked into shared libraries (Silo)
+./configure --prefix=${HDF5_DIR} --with-zlib=${ZLIB_DIR} --enable-cxx=${HDF5_ENABLE_CXX} --enable-fortran=${HDF5_ENABLE_FORTRAN} --enable-fortran2003=${HDF5_ENABLE_FORTRAN} --enable-tests=no --disable-shared --enable-static-exec --with-pic
 
 echo "HDF5: Building..."
 ${MAKE}
