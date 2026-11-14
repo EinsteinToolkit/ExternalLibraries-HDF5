@@ -175,7 +175,7 @@ if [ -n "$HDF5_BUILD" -o -z "${HDF5_DIR}" ]; then
     check_tools "tar patch"
     
     # Set locations
-    NAME=hdf5-1.10.5
+    NAME=hdf5-1.12.1
     SRCDIR="$(dirname $0)"
     BUILD_DIR=${SCRATCH_BUILD}/build/${THORN}
     if [ -z "${HDF5_INSTALL_DIR}" ]; then
